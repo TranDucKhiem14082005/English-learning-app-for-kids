@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "27815528652",
+    "project_id": "tinyenglishapp",
+    "storage_bucket": "tinyenglishapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:27815528652:android:b920c61085a62cb02d1a69",
+        "android_client_info": {
+          "package_name": "khiem.it.tinyenglish"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvFLGxQpD20bv26T25hA4Q9Kw-peDRkco"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

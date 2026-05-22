@@ -1,0 +1,10 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.TinyEnglish" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary_blue</item>
+        <item name="colorSecondary">@color/accent_yellow</item>
+        <item name="colorTertiary">@color/accent_pink</item>
+    </style>
+
+    <style name="Theme.TinyEnglish" parent="Base.Theme.TinyEnglish" />
+</resources>
