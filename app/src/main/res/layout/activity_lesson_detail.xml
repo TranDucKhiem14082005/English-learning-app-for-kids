@@ -7,105 +7,101 @@
     android:background="@drawable/gradient_background"
     android:padding="16dp">
 
-    <!-- Progress Section -->
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/rounded_card_bg"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/questionCounter"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="14sp"
-                android:textColor="@color/text_secondary"
-                android:text="1 / 20" />
-
-            <TextView
-                android:id="@+id/progressPercent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:textColor="@color/primary_blue"
-                android:text="0%" />
-        </LinearLayout>
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="@android:style/Widget.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="8dp"
-            android:progress="0"
-            android:max="100"
-            android:progressDrawable="@drawable/progress_bar_bg" />
-    </LinearLayout>
-
-    <!-- Question Section -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/rounded_card_bg"
-        android:padding="16dp"
-        android:layout_marginBottom="20dp">
-
-        <ImageView
-            android:id="@+id/questionImage"
-            android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:layout_marginBottom="16dp"
-            android:scaleType="fitCenter"
-            android:contentDescription="Question image" />
-
-        <TextView
-            android:id="@+id/questionText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_primary"
-            android:text="Sample question text"
-            android:lineSpacingMultiplier="1.3" />
-    </LinearLayout>
-
-    <!-- Options Section - Compact & Centered -->
-
-    <!-- Buttons Section - Moved Up & Larger -->
-
-    <FrameLayout
-        android:layout_width="372dp"
-        android:layout_height="180dp"
-        android:layout_marginBottom="20dp"
-        android:gravity="center_horizontal">
-
-        <LinearLayout
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/rounded_card_bg"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <ScrollView
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/rounded_card_bg"
+                android:padding="16dp"
+                android:layout_marginBottom="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/questionCounter"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
+                        android:text="1 / 20" />
+
+                    <TextView
+                        android:id="@+id/progressPercent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_blue"
+                        android:text="0%" />
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    style="@android:style/Widget.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:layout_marginTop="8dp"
+                    android:progress="0"
+                    android:max="100"
+                    android:progressDrawable="@drawable/progress_bar_bg" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/rounded_card_bg"
+                android:padding="16dp"
+                android:layout_marginBottom="20dp">
+
+                <ImageView
+                    android:id="@+id/questionImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:layout_marginBottom="16dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Question image" />
+
+                <TextView
+                    android:id="@+id/questionText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:text="Sample question text"
+                    android:lineSpacingMultiplier="1.3" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/rounded_card_bg"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
                     <RadioGroup
                         android:id="@+id/optionsRadioGroup"
@@ -120,38 +116,41 @@
                         android:orientation="vertical"
                         android:layout_marginTop="4dp" />
                 </LinearLayout>
-            </ScrollView>
+            </FrameLayout>
+
         </LinearLayout>
-    </FrameLayout>
+    </ScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginTop="24dp">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/prevButton"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:text="Quay lại"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:enabled="false"
-            app:cornerRadius="12dp"
-            app:backgroundTint="@color/secondary_gray" />
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="24dp"> <com.google.android.material.button.MaterialButton
+        android:id="@+id/prevButton"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_weight="1"
+        android:layout_marginEnd="8dp"
+        android:text="Quay lại"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:enabled="false"
+        app:cornerRadius="12dp"
+        app:backgroundTint="@color/secondary_gray" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/nextButton"
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
+            android:layout_marginStart="8dp"
             android:text="Tiếp"
             android:textSize="15sp"
             android:textStyle="bold"
             app:backgroundTint="@color/primary_blue"
             app:cornerRadius="12dp" />
     </LinearLayout>
+
 </LinearLayout>

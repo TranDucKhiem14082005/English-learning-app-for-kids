@@ -268,19 +268,58 @@ public class LessonsFragment extends Fragment {
             }
         } else if ("lesson_plants".equals(lessonId)) {
             String[] plantImages = new String[] {
-                    "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=400",
-                    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400",
-                    "https://images.unsplash.com/photo-1469484097594-6f4ee5583fb4?w=400",
-                    "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400",
-                    "https://images.unsplash.com/photo-1545241749-1ceff0df5c75?w=400"
+                    "android.resource://khiem.it.tinyenglish/mipmap/coconut",
+                    "android.resource://khiem.it.tinyenglish/mipmap/banyan",
+                    "android.resource://khiem.it.tinyenglish/mipmap/eucalyptus",
+                    "android.resource://khiem.it.tinyenglish/mipmap/cypress",
+                    "android.resource://khiem.it.tinyenglish/mipmap/cherryblossom",
+                    "android.resource://khiem.it.tinyenglish/mipmap/willow",
+                    "android.resource://khiem.it.tinyenglish/mipmap/banana",
+                    "android.resource://khiem.it.tinyenglish/mipmap/rose",
+                    "android.resource://khiem.it.tinyenglish/mipmap/pine",
+                    "android.resource://khiem.it.tinyenglish/mipmap/maple",
+                    "android.resource://khiem.it.tinyenglish/mipmap/aloevera",
+                    "android.resource://khiem.it.tinyenglish/mipmap/succulent",
+                    "android.resource://khiem.it.tinyenglish/mipmap/fern",
+                    "android.resource://khiem.it.tinyenglish/mipmap/bamboo",
+                    "android.resource://khiem.it.tinyenglish/mipmap/cactus"
             };
-            String[] plantAnswers = new String[] { "Plant", "Trees", "Leaves", "Flowers", "Cactus" };
+            String[] plantAnswers = new String[] {
+                    "Coconut", "Banyan", "Eucalyptus", "Cypress", "Cherry Blossom",
+                    "Willow", "Banana", "Rose", "Pine", "Maple",
+                    "Aloe Vera", "Succulent", "Fern", "Bamboo", "Cactus"
+            };
             List<List<String>> plantOptions = Arrays.asList(
-                    Arrays.asList("Plant", "Animal", "Car"),
-                    Arrays.asList("Trees", "Ocean", "City"),
-                    Arrays.asList("Leaves", "Stones", "Clouds"),
-                    Arrays.asList("Flowers", "Fish", "Cars"),
-                    Arrays.asList("Cactus", "Banana", "Snow")
+                    // 1. Coconut
+                    Arrays.asList("Banana", "Pine", "Coconut", "Banyan"),
+                    // 2. Banyan
+                    Arrays.asList("Banyan", "Willow", "Eucalyptus", "Cypress"),
+                    // 3. Eucalyptus
+                    Arrays.asList("Maple", "Cypress", "Pine", "Eucalyptus"),
+                    // 4. Cypress
+                    Arrays.asList("Bamboo", "Cypress", "Willow", "Fern"),
+                    // 5. Cherry Blossom
+                    Arrays.asList("Rose", "Cherry Blossom", "Maple", "Willow"),
+                    // 6. Willow
+                    Arrays.asList("Banyan", "Eucalyptus", "Pine", "Willow"),
+                    // 7. Banana
+                    Arrays.asList("Banana", "Coconut", "Cactus", "Aloe Vera"),
+                    // 8. Rose
+                    Arrays.asList("Cherry Blossom", "Fern", "Rose", "Succulent"),
+                    // 9. Pine
+                    Arrays.asList("Maple", "Cypress", "Pine", "Bamboo"),
+                    // 10. Maple
+                    Arrays.asList("Eucalyptus", "Maple", "Banyan", "Willow"),
+                    // 11. Aloe Vera
+                    Arrays.asList("Cactus", "Succulent", "Fern", "Aloe Vera"),
+                    // 12. Succulent
+                    Arrays.asList("Succulent", "Cactus", "Aloe Vera", "Rose"),
+                    // 13. Fern
+                    Arrays.asList("Bamboo", "Fern", "Cypress", "Willow"),
+                    // 14. Bamboo
+                    Arrays.asList("Pine", "Cypress", "Bamboo", "Fern"),
+                    // 15. Cactus
+                    Arrays.asList("Cactus", "Aloe Vera", "Succulent", "Banana")
             );
             for (int i = 0; i < plantImages.length; i++) {
                 questions.add(createQuestion("q" + (i + 1), "What is shown in the image?", "MULTIPLE_CHOICE",
@@ -294,19 +333,55 @@ public class LessonsFragment extends Fragment {
             }
         } else if ("lesson_fruits".equals(lessonId)) {
             String[] fruitImages = new String[] {
-                    "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400",
-                    "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400",
-                    "https://images.unsplash.com/photo-1587393855258-915a805b33e6?w=400",
-                    "https://images.unsplash.com/photo-1585518419759-84b902c41ee4?w=400",
-                    "https://images.unsplash.com/photo-1585076372410-e9dc5b26fbb2?w=400"
+                    "android.resource://khiem.it.tinyenglish/mipmap/apple",
+                    "android.resource://khiem.it.tinyenglish/mipmap/banana",
+                    "android.resource://khiem.it.tinyenglish/mipmap/orange",
+                    "android.resource://khiem.it.tinyenglish/mipmap/mango",
+                    "android.resource://khiem.it.tinyenglish/mipmap/grape",
+                    "android.resource://khiem.it.tinyenglish/mipmap/strawberry",
+                    "android.resource://khiem.it.tinyenglish/mipmap/watermelon",
+                    "android.resource://khiem.it.tinyenglish/mipmap/pineapple",
+                    "android.resource://khiem.it.tinyenglish/mipmap/papaya",
+                    "android.resource://khiem.it.tinyenglish/mipmap/avocado",
+                    "android.resource://khiem.it.tinyenglish/mipmap/lemon",
+                    "android.resource://khiem.it.tinyenglish/mipmap/peach",
+                    "android.resource://khiem.it.tinyenglish/mipmap/durian",
+                    "android.resource://khiem.it.tinyenglish/mipmap/jackfruit",
+                    "android.resource://khiem.it.tinyenglish/mipmap/guava"
             };
-            String[] fruitAnswers = new String[] { "Banana", "Orange", "Strawberry", "Kiwi", "Mango" };
+            String[] fruitAnswers = new String[] { "Apple", "Banana", "Orange", "Mango", "Grape",
+                    "Strawberry", "Watermelon", "Pineapple", "Papaya", "Avocado",
+                    "Lemon", "Peach", "Durian", "Jackfruit", "Guava" };
             List<List<String>> fruitOptions = Arrays.asList(
-                    Arrays.asList("Banana", "Apple", "Orange"),
-                    Arrays.asList("Orange", "Lemon", "Grape"),
-                    Arrays.asList("Strawberry", "Cherry", "Blueberry"),
-                    Arrays.asList("Kiwi", "Pear", "Coconut"),
-                    Arrays.asList("Mango", "Pineapple", "Papaya")
+                    Arrays.asList("Peach", "Apple", "Orange", "Mango"),
+                    // 2. Banana
+                    Arrays.asList("Banana", "Papaya", "Lemon", "Durian"),
+                    // 3. Orange
+                    Arrays.asList("Mango", "Lemon", "Orange", "Grape"),
+                    // 4. Mango
+                    Arrays.asList("Jackfruit", "Mango", "Papaya", "Guava"),
+                    // 5. Grape
+                    Arrays.asList("Strawberry", "Grape", "Watermelon", "Apple"),
+                    // 6. Strawberry
+                    Arrays.asList("Strawberry", "Grape", "Peach", "Avocado"),
+                    // 7. Watermelon
+                    Arrays.asList("Pineapple", "Melon", "Watermelon", "Papaya"),
+                    // 8. Pineapple
+                    Arrays.asList("Durian", "Jackfruit", "Avocado", "Pineapple"),
+                    // 9. Papaya
+                    Arrays.asList("Papaya", "Mango", "Guava", "Banana"),
+                    // 10. Avocado
+                    Arrays.asList("Lemon", "Avocado", "Durian", "Watermelon"),
+                    // 11. Lemon
+                    Arrays.asList("Orange", "Peach", "Lemon", "Guava"),
+                    // 12. Peach
+                    Arrays.asList("Apple", "Strawberry", "Mango", "Peach"),
+                    // 13. Durian
+                    Arrays.asList("Durian", "Jackfruit", "Pineapple", "Avocado"),
+                    // 14. Jackfruit
+                    Arrays.asList("Durian", "Papaya", "Jackfruit", "Guava"),
+                    // 15. Guava
+                    Arrays.asList("Apple", "Lemon", "Mango", "Guava")
             );
             for (int i = 0; i < fruitImages.length; i++) {
                 questions.add(createQuestion("q" + (i + 1), "Which fruit is shown in the image?", "MULTIPLE_CHOICE",
@@ -320,19 +395,56 @@ public class LessonsFragment extends Fragment {
             }
         } else if ("lesson_vegetables".equals(lessonId)) {
             String[] vegetableImages = new String[] {
-                    "https://images.unsplash.com/photo-1599599810639-a6d6a8ad8e3b?w=400",
-                    "https://images.unsplash.com/photo-1590969814534-aad6401665b5?w=400",
-                    "https://images.unsplash.com/photo-1599599810951-f50c766c4c69?w=400",
-                    "https://images.unsplash.com/photo-1599599810545-01d15e7e3d58?w=400",
-                    "https://images.unsplash.com/photo-1599599810639-a6d6a8ad8e3b?w=400"
+                    "android.resource://khiem.it.tinyenglish/mipmap/broccoli",
+                    "android.resource://khiem.it.tinyenglish/mipmap/cabbage",
+                    "android.resource://khiem.it.tinyenglish/mipmap/carrot",
+                    "android.resource://khiem.it.tinyenglish/mipmap/tomato",
+                    "android.resource://khiem.it.tinyenglish/mipmap/potato",
+                    "android.resource://khiem.it.tinyenglish/mipmap/cucumber",
+                    "android.resource://khiem.it.tinyenglish/mipmap/spinach",
+                    "android.resource://khiem.it.tinyenglish/mipmap/onion",
+                    "android.resource://khiem.it.tinyenglish/mipmap/garlic",
+                    "android.resource://khiem.it.tinyenglish/mipmap/bellpepper",
+                    "android.resource://khiem.it.tinyenglish/mipmap/pumpkin",
+                    "android.resource://khiem.it.tinyenglish/mipmap/eggplant",
+                    "android.resource://khiem.it.tinyenglish/mipmap/peas",
+                    "android.resource://khiem.it.tinyenglish/mipmap/corn",
+                    "android.resource://khiem.it.tinyenglish/mipmap/mushroom"
             };
-            String[] vegetableAnswers = new String[] { "Carrot", "Broccoli", "Tomato", "Spinach", "Carrot" };
+            String[] vegetableAnswers = new String[] {"Broccoli", "Cabbage", "Carrot", "Tomato", "Potato",
+                    "Cucumber", "Spinach", "Onion", "Garlic", "Bell Pepper",
+                    "Pumpkin", "Eggplant", "Peas", "Corn", "Mushroom" };
             List<List<String>> vegetableOptions = Arrays.asList(
-                    Arrays.asList("Carrot", "Lettuce", "Cucumber"),
-                    Arrays.asList("Broccoli", "Cabbage", "Onion"),
-                    Arrays.asList("Tomato", "Potato", "Pepper"),
-                    Arrays.asList("Spinach", "Basil", "Mint"),
-                    Arrays.asList("Carrot", "Lettuce", "Cucumber")
+                    // 1. Broccoli
+                    Arrays.asList("Cabbage", "Broccoli", "Spinach", "Peas"),
+                    // 2. Cabbage
+                    Arrays.asList("Cabbage", "Lettuce", "Onion", "Broccoli"),
+                    // 3. Carrot
+                    Arrays.asList("Potato", "Radish", "Carrot", "Pumpkin"),
+                    // 4. Tomato
+                    Arrays.asList("Bell Pepper", "Tomato", "Eggplant", "Onion"),
+                    // 5. Potato
+                    Arrays.asList("Sweet Potato", "Onion", "Garlic", "Potato"),
+                    // 6. Cucumber
+                    Arrays.asList("Cucumber", "Zucchini", "Eggplant", "Carrot"),
+                    // 7. Spinach
+                    Arrays.asList("Cabbage", "Lettuce", "Spinach", "Broccoli"),
+                    // 8. Onion
+                    Arrays.asList("Garlic", "Onion", "Potato", "Mushroom"),
+                    // 9. Garlic
+                    Arrays.asList("Garlic", "Onion", "Ginger", "Potato"),
+                    // 10. Bell Pepper
+                    Arrays.asList("Tomato", "Chili", "Cucumber", "Bell Pepper"),
+                    // 11. Pumpkin
+                    Arrays.asList("Pumpkin", "Carrot", "Sweet Potato", "Corn"),
+                    // 12. Eggplant
+                    Arrays.asList("Cucumber", "Eggplant", "Tomato", "Bell Pepper"),
+                    // 13. Peas
+                    Arrays.asList("Corn", "Beans", "Peas", "Broccoli"),
+                    // 14. Corn
+                    Arrays.asList("Pumpkin", "Potato", "Peas", "Corn"),
+                    // 15. Mushroom
+                    Arrays.asList("Mushroom", "Garlic", "Onion", "Potato")
             );
             for (int i = 0; i < vegetableImages.length; i++) {
                 questions.add(createQuestion("q" + (i + 1), "Which vegetable is shown in the image?", "MULTIPLE_CHOICE",
