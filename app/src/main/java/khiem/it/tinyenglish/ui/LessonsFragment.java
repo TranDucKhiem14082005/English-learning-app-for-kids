@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,23 +39,23 @@ public class LessonsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_lessons, container, false);
-
+        
         recyclerView = view.findViewById(R.id.lessonsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-
+        
         lessonsRef = FirebaseDatabase.getInstance().getReference("lessons");
-
+        
         loadLessons();
-
+        
         return view;
     }
 
     private void loadLessons() {
         lessonsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onDataChange(DataSnapshot snapshot) {
                 lessons.clear();
-
+                
                 if (snapshot.getChildrenCount() == 0) {
                     Log.d(TAG, "No lessons found, seeding data...");
                     seedLessons();
@@ -64,8 +63,6 @@ public class LessonsFragment extends Fragment {
                     for (DataSnapshot lessonSnapshot : snapshot.getChildren()) {
                         Lesson lesson = lessonSnapshot.getValue(Lesson.class);
                         if (lesson != null) {
-                            // ĐÃ SỬA: Ép cứng hiển thị tổng số câu hỏi luôn là 15 câu khi hiển thị ở màn hình ngoài
-                            lesson.setTotalQuestions(15);
                             lessons.add(lesson);
                         }
                     }
@@ -81,7 +78,7 @@ public class LessonsFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onCancelled(DatabaseError error) {
                 Log.e(TAG, "Failed to load lessons: " + error.getMessage());
                 if (isAdded()) {
                     Toast.makeText(requireContext(), "Failed to load lessons", Toast.LENGTH_SHORT).show();
@@ -92,17 +89,16 @@ public class LessonsFragment extends Fragment {
 
     private void seedLessons() {
         Map<String, Lesson> lessonMap = new HashMap<>();
-        // Tất cả đã được khởi tạo chuẩn chỉnh với 15 câu hỏi
         lessonMap.put("lesson_colors", new Lesson("lesson_colors", "Bài 1: Màu sắc", "Học tên các màu sắc cơ bản", "🎨", 15, true));
-        lessonMap.put("lesson_animals", new Lesson("lesson_animals", "Bài 2: Động vật", "Nhận biết tên các loài động vật", "🐾", 15, false));
-        lessonMap.put("lesson_plants", new Lesson("lesson_plants", "Bài 3: Cây cỏ", "Tìm hiểu về các loài cây", "🌿", 15, false));
-        lessonMap.put("lesson_fruits", new Lesson("lesson_fruits", "Bài 4: Trái cây", "Học tên các loại trái cây", "🍎", 15, false));
-        lessonMap.put("lesson_vegetables", new Lesson("lesson_vegetables", "Bài 5: Rau xanh", "Nhận diện các loại rau xanh", "🥕", 15, false));
+        lessonMap.put("lesson_animals", new Lesson("lesson_animals", "Bài 2: Động vật", "Nhận biết tên các loài động vật", "🐾", 20, false));
+        lessonMap.put("lesson_plants", new Lesson("lesson_plants", "Bài 3: Cây cỏ", "Tìm hiểu về các loài cây", "🌿", 20, false));
+        lessonMap.put("lesson_fruits", new Lesson("lesson_fruits", "Bài 4: Trái cây", "Học tên các loại trái cây", "🍎", 20, false));
+        lessonMap.put("lesson_vegetables", new Lesson("lesson_vegetables", "Bài 5: Rau xanh", "Nhận diện các loại rau xanh", "🥕", 20, false));
 
         for (Map.Entry<String, Lesson> entry : lessonMap.entrySet()) {
             String lessonId = entry.getKey();
             Lesson lesson = entry.getValue();
-
+            
             lessonsRef.child(lessonId).setValue(lesson).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     Log.d(TAG, "Lesson seeded: " + lessonId);
@@ -112,7 +108,7 @@ public class LessonsFragment extends Fragment {
                 }
             });
         }
-
+        
         lessons.clear();
         lessons.addAll(lessonMap.values());
         lessons.sort((l1, l2) -> {
@@ -127,7 +123,7 @@ public class LessonsFragment extends Fragment {
     private void seedQuestionsForLesson(String lessonId) {
         DatabaseReference questionsRef = lessonsRef.child(lessonId).child("questions");
         List<Question> questions = generateQuestions(lessonId);
-
+        
         for (int i = 0; i < questions.size(); i++) {
             Question q = questions.get(i);
             q.setOrder(i);
@@ -138,7 +134,7 @@ public class LessonsFragment extends Fragment {
                 }
             });
         }
-
+        
         Log.d(TAG, "Seeded " + questions.size() + " questions for lesson: " + lessonId);
     }
 
@@ -147,58 +143,94 @@ public class LessonsFragment extends Fragment {
 
         if ("lesson_colors".equals(lessonId)) {
             String questionText = "What color is shown in the image?";
-            String[] colorAnswers = new String[] {
+                String[] colorAnswers = new String[] {
                     "Yellow", "Black", "Purple", "Orange", "Brown",
                     "Gray", "Cyan", "Navy Blue", "Beige", "Magenta / Plum",
                     "Olive Green", "Maroon / Burgundy", "Metallic Gold", "Peach / Light Salmon", "Pink"
-            };
+                };
             String[] colorImages = new String[] {
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q1",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q2",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q3",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q4",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q5",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q6",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q7",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q8",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q9",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q10",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q11",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q12",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q13",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q14",
-                    "android.resource://khiem.it.tinyenglish/mipmap/color_q15"
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q1",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q2",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q3",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q4",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q5",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q6",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q7",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q8",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q9",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q10",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q11",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q12",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q13",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q14",
+                "android.resource://khiem.it.tinyenglish/mipmap/color_q15"
             };
-            List<List<String>> colorOptions = Arrays.asList(
-                    Arrays.asList("Yellow", "Green", "Orange", "Pink"),
-                    Arrays.asList("Black", "White", "Gray", "Brown"),
-                    Arrays.asList("Purple", "Pink", "Violet", "Blue"),
-                    Arrays.asList("Orange", "Red", "Yellow", "Brown"),
-                    Arrays.asList("Brown", "Beige", "Black", "Gray"),
-                    Arrays.asList("Gray", "Silver", "White", "Black"),
-                    Arrays.asList("Cyan", "Blue", "Teal", "Purple"),
-                    Arrays.asList("Navy Blue", "Dark Blue", "Black", "Indigo"),
-                    Arrays.asList("Beige", "Cream", "Brown", "Yellow"),
-                    Arrays.asList("Magenta / Plum", "Pink", "Purple", "Red"),
-                    Arrays.asList("Olive Green", "Lime Green", "Mint Green", "Emerald Green"),
-                    Arrays.asList("Maroon / Burgundy", "Red", "Brown", "Gold"),
-                    Arrays.asList("Metallic Gold", "Yellow", "Bronze", "Silver"),
-                    Arrays.asList("Peach / Light Salmon", "Pink", "Orange", "Beige"),
-                    Arrays.asList("Pink", "Purple", "Red", "Peach / Light Salmon")
-            );
-            String[] colorExplanations = new String[] {
-                    "Yellow — bright like sunlight.", "Black — the darkest color, like night or charcoal.",
-                    "Purple — a regal hue made by mixing red and blue.", "Orange — vivid and warm, like ripe oranges.",
-                    "Brown — earthy and warm, like wood or soil.", "Gray — a neutral tone between black and white.",
-                    "Cyan — a light blue-green, like tropical waters.", "Navy Blue — a deep, dark blue often used for uniforms.",
-                    "Beige — a pale sandy tan color.", "Magenta / Plum — a deep pinkish-purple tone.",
-                    "Olive Green — a muted green like olive leaves.", "Maroon / Burgundy — a dark reddish wine color.",
-                    "Metallic Gold — shiny and metallic, like the precious metal.", "Peach / Light Salmon — a soft pinkish-orange shade.",
+                List<List<String>> colorOptions = Arrays.asList(
+                        // 1.  (Đáp án đúng gốc: Yellow)
+                        Arrays.asList("Pink", "Orange", "Yellow", "Green"),
+
+                        // 2.  (Đáp án đúng gốc: Black)
+                        Arrays.asList("White", "Black", "Brown", "Gray"),
+
+                        // 3.  (Đáp án đúng gốc: Purple)
+                        Arrays.asList("Pink", "Violet", "Blue", "Purple"),
+
+                        // 4.  (Đáp án đúng gốc: Orange)
+                        Arrays.asList("Red", "Yellow", "Orange", "Brown"),
+
+                        // 5. (Đáp án đúng gốc: Brown)
+                        Arrays.asList("Beige", "Gray", "Black", "Brown"),
+
+                        // 6.  (Đáp án đúng gốc: Gray)
+                        Arrays.asList("Gray", "Black", "Silver", "White"),
+
+                        // 7.  (Đáp án đúng gốc: Cyan)
+                        Arrays.asList("Blue", "Teal", "Purple", "Cyan"),
+
+                        // 8. Đáp án đúng gốc: Navy Blue)
+                        Arrays.asList("Dark Blue", "Navy Blue", "Indigo", "Black"),
+
+                        // 9. (Đáp án đúng gốc: Beige)
+                        Arrays.asList("Cream", "Brown", "Beige", "Yellow"),
+
+                        // 10. (Đáp án đúng gốc: Magenta / Plum)
+                        Arrays.asList("Pink", "Magenta / Plum", "Red", "Purple"),
+
+                        // 11. (Đáp án đúng gốc: Olive Green)
+                        Arrays.asList("Lime Green", "Mint Green", "Emerald Green", "Olive Green"),
+
+                        // 12. (Đáp án đúng gốc: Maroon / Burgundy)
+                        Arrays.asList("Maroon / Burgundy", "Gold", "Red", "Brown"),
+
+                        // 13. (Đáp án đúng gốc: Metallic Gold)
+                        Arrays.asList("Yellow", "Bronze", "Silver", "Metallic Gold"),
+
+                        // 14. (Đáp án đúng gốc: Peach / Light Salmon)
+                        Arrays.asList("Peach / Light Salmon", "Pink", "Beige", "Orange"),
+
+                        // 15. (Đáp án đúng gốc: Pink)
+                        Arrays.asList("Purple", "Red", "Pink", "Peach / Light Salmon")
+                );
+                String[] colorExplanations = new String[] {
+                    "Yellow — bright like sunlight.",
+                    "Black — the darkest color, like night or charcoal.",
+                    "Purple — a regal hue made by mixing red and blue.",
+                    "Orange — vivid and warm, like ripe oranges.",
+                    "Brown — earthy and warm, like wood or soil.",
+                    "Gray — a neutral tone between black and white.",
+                    "Cyan — a light blue-green, like tropical waters.",
+                    "Navy Blue — a deep, dark blue often used for uniforms.",
+                    "Beige — a pale sandy tan color.",
+                    "Magenta / Plum — a deep pinkish-purple tone.",
+                    "Olive Green — a muted green like olive leaves.",
+                    "Maroon / Burgundy — a dark reddish wine color.",
+                    "Metallic Gold — shiny and metallic, like the precious metal.",
+                    "Peach / Light Salmon — a soft pinkish-orange shade.",
                     "Pink — a light red tone often associated with softness."
-            };
+                };
             for (int i = 0; i < colorImages.length; i++) {
                 questions.add(createColorQuestion("q" + (i + 1), questionText,
-                        colorOptions.get(i), colorAnswers[i], colorImages[i], colorExplanations[i]));
+                    colorOptions.get(i), colorAnswers[i], colorImages[i], colorExplanations[i]));
             }
         } else if ("lesson_animals".equals(lessonId)) {
             String[] animalImages = new String[] {
@@ -216,14 +248,11 @@ public class LessonsFragment extends Fragment {
                     "android.resource://khiem.it.tinyenglish/mipmap/polarbear",
                     "android.resource://khiem.it.tinyenglish/mipmap/rabbit",
                     "android.resource://khiem.it.tinyenglish/mipmap/squirrel",
-                    "android.resource://khiem.it.tinyenglish/mipmap/tiger",
-
+                    "android.resource://khiem.it.tinyenglish/mipmap/tiger"
             };
-            String[] animalAnswers = new String[] {
-                    "Cat", "Dog", "Elephant", "Fox", "Giraffe",
+            String[] animalAnswers = new String[] { "Cat", "Dog", "Elephant", "Fox", "Giraffe",
                     "Kangaroo", "Koala", "Lion", "Monkey", "Panda",
-                    "Penguin", "Polar Bear", "Rabbit", "Squirrel", "Tiger"
-            };
+                    "Penguin", "Polar Bear", "Rabbit", "Squirrel", "Tiger"};
             List<List<String>> animalOptions = Arrays.asList(
                     // 1. cat
                     Arrays.asList("Cat", "Fox", "Lion", "Panda"),
@@ -260,8 +289,7 @@ public class LessonsFragment extends Fragment {
                 questions.add(createQuestion("q" + (i + 1), "Which animal is shown in the image?", "MULTIPLE_CHOICE",
                         animalOptions.get(i), animalAnswers[i], animalImages[i]));
             }
-            // Khớp chuẩn 15 câu (Vòng lặp chạy 10 lần)
-            for (int i = 6; i <= 15; i++) {
+            for (int i = 6; i <= 20; i++) {
                 int idx = (i - 6) % animalImages.length;
                 questions.add(createQuestion("q" + i, "Which animal is shown in the image?", "MULTIPLE_CHOICE",
                         animalOptions.get(idx), animalAnswers[idx], animalImages[idx]));
@@ -284,11 +312,9 @@ public class LessonsFragment extends Fragment {
                     "android.resource://khiem.it.tinyenglish/mipmap/bamboo",
                     "android.resource://khiem.it.tinyenglish/mipmap/cactus"
             };
-            String[] plantAnswers = new String[] {
-                    "Coconut", "Banyan", "Eucalyptus", "Cypress", "Cherry Blossom",
+            String[] plantAnswers = new String[] { "Coconut", "Banyan", "Eucalyptus", "Cypress", "Cherry Blossom",
                     "Willow", "Banana", "Rose", "Pine", "Maple",
-                    "Aloe Vera", "Succulent", "Fern", "Bamboo", "Cactus"
-            };
+                    "Aloe Vera", "Succulent", "Fern", "Bamboo", "Cactus"};
             List<List<String>> plantOptions = Arrays.asList(
                     // 1. Coconut
                     Arrays.asList("Banana", "Pine", "Coconut", "Banyan"),
@@ -325,8 +351,7 @@ public class LessonsFragment extends Fragment {
                 questions.add(createQuestion("q" + (i + 1), "What is shown in the image?", "MULTIPLE_CHOICE",
                         plantOptions.get(i), plantAnswers[i], plantImages[i]));
             }
-            // Khớp chuẩn 15 câu
-            for (int i = 6; i <= 15; i++) {
+            for (int i = 6; i <= 20; i++) {
                 int idx = (i - 6) % plantImages.length;
                 questions.add(createQuestion("q" + i, "What is shown in the image?", "MULTIPLE_CHOICE",
                         plantOptions.get(idx), plantAnswers[idx], plantImages[idx]));
@@ -334,7 +359,7 @@ public class LessonsFragment extends Fragment {
         } else if ("lesson_fruits".equals(lessonId)) {
             String[] fruitImages = new String[] {
                     "android.resource://khiem.it.tinyenglish/mipmap/apple",
-                    "android.resource://khiem.it.tinyenglish/mipmap/banana",
+                    "android.resource://khiem.it.tinyenglish/mipmap/bananatrai",
                     "android.resource://khiem.it.tinyenglish/mipmap/orange",
                     "android.resource://khiem.it.tinyenglish/mipmap/mango",
                     "android.resource://khiem.it.tinyenglish/mipmap/grape",
@@ -353,6 +378,7 @@ public class LessonsFragment extends Fragment {
                     "Strawberry", "Watermelon", "Pineapple", "Papaya", "Avocado",
                     "Lemon", "Peach", "Durian", "Jackfruit", "Guava" };
             List<List<String>> fruitOptions = Arrays.asList(
+                    // 1. Apple
                     Arrays.asList("Peach", "Apple", "Orange", "Mango"),
                     // 2. Banana
                     Arrays.asList("Banana", "Papaya", "Lemon", "Durian"),
@@ -387,8 +413,7 @@ public class LessonsFragment extends Fragment {
                 questions.add(createQuestion("q" + (i + 1), "Which fruit is shown in the image?", "MULTIPLE_CHOICE",
                         fruitOptions.get(i), fruitAnswers[i], fruitImages[i]));
             }
-            // Khớp chuẩn 15 câu
-            for (int i = 6; i <= 15; i++) {
+            for (int i = 6; i <= 20; i++) {
                 int idx = (i - 6) % fruitImages.length;
                 questions.add(createQuestion("q" + i, "Which fruit is shown in the image?", "MULTIPLE_CHOICE",
                         fruitOptions.get(idx), fruitAnswers[idx], fruitImages[idx]));
@@ -411,9 +436,9 @@ public class LessonsFragment extends Fragment {
                     "android.resource://khiem.it.tinyenglish/mipmap/corn",
                     "android.resource://khiem.it.tinyenglish/mipmap/mushroom"
             };
-            String[] vegetableAnswers = new String[] {"Broccoli", "Cabbage", "Carrot", "Tomato", "Potato",
+            String[] vegetableAnswers = new String[] { "Broccoli", "Cabbage", "Carrot", "Tomato", "Potato",
                     "Cucumber", "Spinach", "Onion", "Garlic", "Bell Pepper",
-                    "Pumpkin", "Eggplant", "Peas", "Corn", "Mushroom" };
+                    "Pumpkin", "Eggplant", "Peas", "Corn", "Mushroom"};
             List<List<String>> vegetableOptions = Arrays.asList(
                     // 1. Broccoli
                     Arrays.asList("Cabbage", "Broccoli", "Spinach", "Peas"),
@@ -450,8 +475,7 @@ public class LessonsFragment extends Fragment {
                 questions.add(createQuestion("q" + (i + 1), "Which vegetable is shown in the image?", "MULTIPLE_CHOICE",
                         vegetableOptions.get(i), vegetableAnswers[i], vegetableImages[i]));
             }
-            // Khớp chuẩn 15 câu
-            for (int i = 6; i <= 15; i++) {
+            for (int i = 6; i <= 20; i++) {
                 int idx = (i - 6) % vegetableImages.length;
                 questions.add(createQuestion("q" + i, "Which vegetable is shown in the image?", "MULTIPLE_CHOICE",
                         vegetableOptions.get(idx), vegetableAnswers[idx], vegetableImages[idx]));
@@ -502,25 +526,12 @@ public class LessonsFragment extends Fragment {
             question.setLessonId(lessonId);
         }
 
-        // Đã sửa: Cập nhật đồng bộ số lượng bài học tổng (totalQuestions) về 15 trên node tổng
-        lessonsRef.child(lessonId).child("totalQuestions").setValue(15);
-
         lessonsRef.child(lessonId).child("questions").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // ĐOẠN ĐƯỢC CHỈNH SỬA: Tự động quét và xóa sạch những câu hỏi thừa từ index 15 đến 19 (tức là câu 16 -> 20 cũ)
+            public void onDataChange(DataSnapshot snapshot) {
                 for (DataSnapshot questionSnapshot : snapshot.getChildren()) {
-                    String key = questionSnapshot.getKey();
-                    if (key != null && key.matches("\\d+")) {
-                        int index = Integer.parseInt(key);
-                        // Nếu index từ 15 trở lên (nghĩa là từ câu hỏi thứ 16), tiến hành xóa bỏ khỏi Firebase
-                        if (index >= templateQuestions.size()) {
-                            questionSnapshot.getRef().removeValue();
-                            continue;
-                        }
-                    }
-
                     Question template = null;
+                    String key = questionSnapshot.getKey();
                     if (key != null && key.matches("\\d+")) {
                         int index = Integer.parseInt(key);
                         if (index >= 0 && index < templateQuestions.size()) {
@@ -560,7 +571,7 @@ public class LessonsFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+            public void onCancelled(DatabaseError error) {
                 Log.e(TAG, "Failed to sync question content: " + error.getMessage());
             }
         });
@@ -574,3 +585,4 @@ public class LessonsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
     }
 }
+

@@ -40,16 +40,14 @@
                         android:layout_weight="1"
                         android:textSize="14sp"
                         android:textColor="@color/text_secondary"
-                        android:text="1 / 20" />
-
-                    <TextView
-                        android:id="@+id/progressPercent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/primary_blue"
-                        android:text="0%" />
+                        android:text="1 / 15" /> <TextView
+                    android:id="@+id/progressPercent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_blue"
+                    android:text="0%" />
                 </LinearLayout>
 
                 <ProgressBar
@@ -74,9 +72,10 @@
                 <ImageView
                     android:id="@+id/questionImage"
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
+                    android:layout_height="250dp"
                     android:layout_marginBottom="16dp"
-                    android:adjustViewBounds="true"
+                    android:adjustViewBounds="false"
+                    android:layout_gravity="center"
                     android:scaleType="fitCenter"
                     android:contentDescription="Question image" />
 
@@ -114,7 +113,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_marginTop="4dp" />
+                        android:layout_marginTop="4dp"
+                        android:visibility="gone" />
                 </LinearLayout>
             </FrameLayout>
 
@@ -127,18 +127,20 @@
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="24dp"> <com.google.android.material.button.MaterialButton
-        android:id="@+id/prevButton"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_weight="1"
-        android:layout_marginEnd="8dp"
-        android:text="Quay lại"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        android:enabled="false"
-        app:cornerRadius="12dp"
-        app:backgroundTint="@color/secondary_gray" />
+        android:layout_marginBottom="24dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/prevButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="Quay lại"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:enabled="false"
+            app:cornerRadius="12dp"
+            app:backgroundTint="@color/secondary_gray" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/nextButton"

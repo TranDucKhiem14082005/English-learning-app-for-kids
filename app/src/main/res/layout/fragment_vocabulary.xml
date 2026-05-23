@@ -1,20 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="#F7F9FC"
     android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/vocabulary_title"
-        android:textSize="22sp"
-        android:textStyle="bold" />
-
-    <ListView
-        android:id="@+id/vocabularyListView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="12dp" />
-</LinearLayout>
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📚"
+                android:textSize="28sp"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Từ Vựng Mỗi Ngày"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#2C3E50" />
+        </LinearLayout>
+
+        <ExpandableListView
+            android:id="@+id/vocabularyExpandableListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp"
+            android:childDivider="@android:color/transparent"
+            android:groupIndicator="@null"
+            android:scrollbars="none" />
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddVocabulary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:contentDescription="Add new word"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="#3498DB"
+        app:tint="#FFFFFF"
+        app:fabSize="normal" />
+
+</RelativeLayout>

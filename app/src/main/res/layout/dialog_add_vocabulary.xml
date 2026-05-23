@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Thêm Từ Vựng Mới"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#2C3E50"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"/>
+
+    <EditText
+        android:id="@+id/edtNewWord"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Nhập từ tiếng Anh (Ví dụ: Hello)"
+        android:inputType="text"
+        android:background="@android:drawable/edit_text"
+        android:padding="10dp"
+        android:layout_marginBottom="12dp"
+        android:textSize="14sp"/>
+
+    <EditText
+        android:id="@+id/edtNewMeaning"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Nhập nghĩa tiếng Việt (Ví dụ: Xin chào)"
+        android:inputType="text"
+        android:background="@android:drawable/edit_text"
+        android:padding="10dp"
+        android:layout_marginBottom="12dp"
+        android:textSize="14sp"/>
+
+    <EditText
+        android:id="@+id/edtNewExample"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="Nhập câu ví dụ tiếng Anh"
+        android:inputType="textLongMessage"
+        android:background="@android:drawable/edit_text"
+        android:padding="10dp"
+        android:layout_marginBottom="12dp"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Chọn chủ đề để lưu vào:"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#34495E"
+        android:layout_marginBottom="6dp"/>
+
+    <Spinner
+        android:id="@+id/spinnerTopics"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@android:drawable/btn_dropdown"
+        android:spinnerMode="dropdown"
+        android:layout_marginBottom="8dp"/>
+</LinearLayout>

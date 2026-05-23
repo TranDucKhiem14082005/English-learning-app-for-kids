@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/vocabCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
     android:layout_marginBottom="4dp"
-    app:cardCornerRadius="14dp"
-    app:cardElevation="1dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="3dp"
     app:cardUseCompatPadding="true">
 
     <LinearLayout
@@ -14,7 +14,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="14dp">
+        android:background="#3498DB"
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -23,40 +24,32 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/vocabWordText"
+                android:id="@+id/groupTitleText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="19sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="#2C3E50" />
+                android:textColor="#FFFFFF"
+                android:text="🐾 ANIMALS" />
 
             <TextView
-                android:id="@+id/vocabMeaningText"
+                android:id="@+id/groupDescText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:textColor="#E67E22" />
-
-            <TextView
-                android:id="@+id/vocabExampleText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="2dp"
                 android:textSize="13sp"
-                android:textStyle="italic"
-                android:textColor="#7F8C8D" />
+                android:textColor="#E0F2FE"
+                android:text="Khám phá thế giới động vật" />
         </LinearLayout>
 
         <TextView
-            android:id="@+id/vocabSpeakerIcon"
+            android:id="@+id/groupIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🔊"
-            android:textSize="22sp"
-            android:layout_marginStart="12dp"
-            android:alpha="0.8" />
+            android:text="▼"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:layout_marginStart="8dp" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
