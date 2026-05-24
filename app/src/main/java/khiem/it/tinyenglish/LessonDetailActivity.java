@@ -142,28 +142,77 @@ public class LessonDetailActivity extends AppCompatActivity {
 
         Question question = questions.get(currentQuestionIndex);
 
-        // ĐÃ SỬA: Ép chữ câu hỏi hiển thị thuần túy vào TextView, không dùng Inline ImageSpan lỗi thời nữa
-        questionTextView.setText(question.getQuestionText());
+        // Cập nhật thông tin Tiến độ chung (Dùng chung cho tất cả các loại câu hỏi)
         questionCounterView.setText((currentQuestionIndex + 1) + " / " + questions.size());
-
         int progressPercent = (int) ((currentQuestionIndex + 1) * 100 / questions.size());
         progressPercentView.setText(progressPercent + "%");
         progressBar.setProgress(progressPercent);
 
-        // ĐÃ SỬA: Bất kể ảnh online hay offline đều đi qua hàm load ảnh chuẩn của Glide để căn giữa
-        loadQuestionImage(question.getImageUrl());
-
         radioGroup.removeAllViews();
         checkBoxContainer.removeAllViews();
 
-        if ("MULTIPLE_CHOICE".equals(question.getQuestionType())) {
-            displayMultipleChoice(question);
-        } else if ("TRUE_FALSE".equals(question.getQuestionType())) {
-            displayTrueFalse(question);
+        // LUỒNG XỬ LÝ RẼ NHÁNH TỐI ƯU KHÔNG LẶP CODE
+        if ("GUIDED_TRANSLATION".equals(question.getQuestionType())) {
+            // Nhánh mới bổ sung: Dành cho bài luyện dịch câu dịch (Tự quản lý text và ẩn ảnh)
+            displayGuidedTranslation(question);
+        } else {
+            // GIỮ NGUYÊN: Nhánh dành cho 5 chủ đề cũ (Nạp chữ thuần túy và hiển thị ảnh qua Glide)
+            questionTextView.setText(question.getQuestionText());
+            loadQuestionImage(question.getImageUrl());
+
+            if ("MULTIPLE_CHOICE".equals(question.getQuestionType())) {
+                displayMultipleChoice(question);
+            } else if ("TRUE_FALSE".equals(question.getQuestionType())) {
+                displayTrueFalse(question);
+            }
         }
 
         prevButton.setEnabled(currentQuestionIndex > 0);
         nextButton.setText(currentQuestionIndex == questions.size() - 1 ? "Hoàn thành" : "Tiếp");
+    }
+
+    private void displayGuidedTranslation(Question question) {
+        // Ẩn ImageView vì bài dịch câu tập trung hoàn toàn vào xử lý chữ trực quan
+        questionImage.setVisibility(View.GONE);
+
+        String rawText = question.getQuestionText();
+        String formattedContent = rawText;
+
+        // Tính toán cấp độ (Level) hiển thị dựa trên chỉ số Index câu hiện tại nhằm tăng tính thử thách
+        String levelHeader = "⭐ LEVEL 1: DỄ (Điền Từ Đơn)";
+        if (currentQuestionIndex >= 5 && currentQuestionIndex < 10) {
+            levelHeader = "⭐⭐ LEVEL 2: TRUNG BÌNH (Từ Ghép)";
+        } else if (currentQuestionIndex >= 10) {
+            levelHeader = "⭐⭐⭐ LEVEL 3: THÁCH THỨC (Điền Cụm Hành Động)";
+        }
+
+        if (rawText != null && rawText.contains("|")) {
+            String[] parts = rawText.split("\\|");
+            String vietnamese = parts[0];
+            String englishHint = parts[1];
+
+            // Thiết kế phân tầng chữ: Tiêu đề Level -> Câu tiếng Việt -> Gợi ý tiếng Anh
+            formattedContent = levelHeader + "\n\n" +
+                    "Hãy dịch câu sau:\n👉 " + vietnamese + "\n\n" +
+                    "Gợi ý: " + englishHint;
+        }
+
+        questionTextView.setText(formattedContent);
+
+        // Đổ danh sách đáp án dưới dạng các ô lựa chọn RadioButton
+        radioGroup.setVisibility(View.VISIBLE);
+        checkBoxContainer.setVisibility(View.GONE);
+
+        if (question.getOptions() != null) {
+            for (String option : question.getOptions()) {
+                RadioButton radioButton = new RadioButton(this);
+                radioButton.setText(option);
+                radioButton.setTag(option);
+                radioButton.setId(View.generateViewId());
+                radioButton.setPadding(0, 16, 0, 16);
+                radioGroup.addView(radioButton);
+            }
+        }
     }
 
     private void loadQuestionImage(String imageUrl) {
@@ -217,6 +266,8 @@ public class LessonDetailActivity extends AppCompatActivity {
     }
 
     private void handleNextQuestion() {
+        if (currentQuestionIndex >= questions.size()) return;
+
         Question question = questions.get(currentQuestionIndex);
         String userAnswer = getSelectedAnswer();
 

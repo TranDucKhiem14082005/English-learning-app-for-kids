@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,35 +40,36 @@ public class LessonsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_lessons, container, false);
-        
+
         recyclerView = view.findViewById(R.id.lessonsRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        
+
         lessonsRef = FirebaseDatabase.getInstance().getReference("lessons");
-        
+
         loadLessons();
-        
+
         return view;
     }
 
     private void loadLessons() {
         lessonsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 lessons.clear();
-                
-                if (snapshot.getChildrenCount() == 0) {
-                    Log.d(TAG, "No lessons found, seeding data...");
+
+                if (snapshot.getChildrenCount() == 0 || !snapshot.hasChild("lesson_translation")) {
+                    Log.d(TAG, "No lessons found or missing Lesson 6, seeding data...");
                     seedLessons();
                 } else {
                     for (DataSnapshot lessonSnapshot : snapshot.getChildren()) {
                         Lesson lesson = lessonSnapshot.getValue(Lesson.class);
                         if (lesson != null) {
+                            lesson.setTotalQuestions(15);
                             lessons.add(lesson);
                         }
                     }
                     lessons.sort((l1, l2) -> {
-                        String order = "🎨🐾🌿🍎🥕";
+                        String order = "🎨🐾🌿🍎🥕📝";
                         int idx1 = order.indexOf(l1.getEmoji());
                         int idx2 = order.indexOf(l2.getEmoji());
                         return Integer.compare(idx1, idx2);
@@ -78,7 +80,7 @@ public class LessonsFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "Failed to load lessons: " + error.getMessage());
                 if (isAdded()) {
                     Toast.makeText(requireContext(), "Failed to load lessons", Toast.LENGTH_SHORT).show();
@@ -90,15 +92,16 @@ public class LessonsFragment extends Fragment {
     private void seedLessons() {
         Map<String, Lesson> lessonMap = new HashMap<>();
         lessonMap.put("lesson_colors", new Lesson("lesson_colors", "Bài 1: Màu sắc", "Học tên các màu sắc cơ bản", "🎨", 15, true));
-        lessonMap.put("lesson_animals", new Lesson("lesson_animals", "Bài 2: Động vật", "Nhận biết tên các loài động vật", "🐾", 20, false));
-        lessonMap.put("lesson_plants", new Lesson("lesson_plants", "Bài 3: Cây cỏ", "Tìm hiểu về các loài cây", "🌿", 20, false));
-        lessonMap.put("lesson_fruits", new Lesson("lesson_fruits", "Bài 4: Trái cây", "Học tên các loại trái cây", "🍎", 20, false));
-        lessonMap.put("lesson_vegetables", new Lesson("lesson_vegetables", "Bài 5: Rau xanh", "Nhận diện các loại rau xanh", "🥕", 20, false));
+        lessonMap.put("lesson_animals", new Lesson("lesson_animals", "Bài 2: Động vật", "Nhận biết tên các loài động vật", "🐾", 15, false));
+        lessonMap.put("lesson_plants", new Lesson("lesson_plants", "Bài 3: Cây cỏ", "Tìm hiểu về các loài cây", "🌿", 15, false));
+        lessonMap.put("lesson_fruits", new Lesson("lesson_fruits", "Bài 4: Trái cây", "Học tên các loại trái cây", "🍎", 15, false));
+        lessonMap.put("lesson_vegetables", new Lesson("lesson_vegetables", "Bài 5: Rau xanh", "Nhận diện các loại rau xanh", "🥕", 15, false));
+        lessonMap.put("lesson_translation", new Lesson("lesson_translation", "Bài 6: Dịch câu", "Thử thách dịch câu theo cấp độ", "📝", 15, false));
 
         for (Map.Entry<String, Lesson> entry : lessonMap.entrySet()) {
             String lessonId = entry.getKey();
             Lesson lesson = entry.getValue();
-            
+
             lessonsRef.child(lessonId).setValue(lesson).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     Log.d(TAG, "Lesson seeded: " + lessonId);
@@ -108,11 +111,11 @@ public class LessonsFragment extends Fragment {
                 }
             });
         }
-        
+
         lessons.clear();
         lessons.addAll(lessonMap.values());
         lessons.sort((l1, l2) -> {
-            String order = "🎨🐾🌿🍎🥕";
+            String order = "🎨🐾🌿🍎🥕📝";
             int idx1 = order.indexOf(l1.getEmoji());
             int idx2 = order.indexOf(l2.getEmoji());
             return Integer.compare(idx1, idx2);
@@ -123,19 +126,15 @@ public class LessonsFragment extends Fragment {
     private void seedQuestionsForLesson(String lessonId) {
         DatabaseReference questionsRef = lessonsRef.child(lessonId).child("questions");
         List<Question> questions = generateQuestions(lessonId);
-        
-        for (int i = 0; i < questions.size(); i++) {
-            Question q = questions.get(i);
-            q.setOrder(i);
-            q.setLessonId(lessonId);
-            questionsRef.child(String.valueOf(i)).setValue(q).addOnCompleteListener(task -> {
-                if (!task.isSuccessful()) {
-                    Log.e(TAG, "Failed to seed question for lesson: " + lessonId);
-                }
-            });
-        }
-        
-        Log.d(TAG, "Seeded " + questions.size() + " questions for lesson: " + lessonId);
+
+        questionsRef.removeValue().addOnCompleteListener(task -> {
+            for (int i = 0; i < questions.size(); i++) {
+                Question q = questions.get(i);
+                q.setOrder(i);
+                q.setLessonId(lessonId);
+                questionsRef.child(String.valueOf(i)).setValue(q);
+            }
+        });
     }
 
     private List<Question> generateQuestions(String lessonId) {
@@ -143,350 +142,103 @@ public class LessonsFragment extends Fragment {
 
         if ("lesson_colors".equals(lessonId)) {
             String questionText = "What color is shown in the image?";
-                String[] colorAnswers = new String[] {
-                    "Yellow", "Black", "Purple", "Orange", "Brown",
-                    "Gray", "Cyan", "Navy Blue", "Beige", "Magenta / Plum",
-                    "Olive Green", "Maroon / Burgundy", "Metallic Gold", "Peach / Light Salmon", "Pink"
-                };
-            String[] colorImages = new String[] {
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q1",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q2",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q3",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q4",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q5",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q6",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q7",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q8",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q9",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q10",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q11",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q12",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q13",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q14",
-                "android.resource://khiem.it.tinyenglish/mipmap/color_q15"
+            String[] colorAnswers = new String[] {
+                    "Yellow", "Black", "Purple", "Orange", "Brown", "Gray", "Cyan", "Navy Blue", "Beige", "Magenta / Plum", "Olive Green", "Maroon / Burgundy", "Metallic Gold", "Peach / Light Salmon", "Pink"
             };
-                List<List<String>> colorOptions = Arrays.asList(
-                        // 1.  (Đáp án đúng gốc: Yellow)
-                        Arrays.asList("Pink", "Orange", "Yellow", "Green"),
-
-                        // 2.  (Đáp án đúng gốc: Black)
-                        Arrays.asList("White", "Black", "Brown", "Gray"),
-
-                        // 3.  (Đáp án đúng gốc: Purple)
-                        Arrays.asList("Pink", "Violet", "Blue", "Purple"),
-
-                        // 4.  (Đáp án đúng gốc: Orange)
-                        Arrays.asList("Red", "Yellow", "Orange", "Brown"),
-
-                        // 5. (Đáp án đúng gốc: Brown)
-                        Arrays.asList("Beige", "Gray", "Black", "Brown"),
-
-                        // 6.  (Đáp án đúng gốc: Gray)
-                        Arrays.asList("Gray", "Black", "Silver", "White"),
-
-                        // 7.  (Đáp án đúng gốc: Cyan)
-                        Arrays.asList("Blue", "Teal", "Purple", "Cyan"),
-
-                        // 8. Đáp án đúng gốc: Navy Blue)
-                        Arrays.asList("Dark Blue", "Navy Blue", "Indigo", "Black"),
-
-                        // 9. (Đáp án đúng gốc: Beige)
-                        Arrays.asList("Cream", "Brown", "Beige", "Yellow"),
-
-                        // 10. (Đáp án đúng gốc: Magenta / Plum)
-                        Arrays.asList("Pink", "Magenta / Plum", "Red", "Purple"),
-
-                        // 11. (Đáp án đúng gốc: Olive Green)
-                        Arrays.asList("Lime Green", "Mint Green", "Emerald Green", "Olive Green"),
-
-                        // 12. (Đáp án đúng gốc: Maroon / Burgundy)
-                        Arrays.asList("Maroon / Burgundy", "Gold", "Red", "Brown"),
-
-                        // 13. (Đáp án đúng gốc: Metallic Gold)
-                        Arrays.asList("Yellow", "Bronze", "Silver", "Metallic Gold"),
-
-                        // 14. (Đáp án đúng gốc: Peach / Light Salmon)
-                        Arrays.asList("Peach / Light Salmon", "Pink", "Beige", "Orange"),
-
-                        // 15. (Đáp án đúng gốc: Pink)
-                        Arrays.asList("Purple", "Red", "Pink", "Peach / Light Salmon")
-                );
-                String[] colorExplanations = new String[] {
-                    "Yellow — bright like sunlight.",
-                    "Black — the darkest color, like night or charcoal.",
-                    "Purple — a regal hue made by mixing red and blue.",
-                    "Orange — vivid and warm, like ripe oranges.",
-                    "Brown — earthy and warm, like wood or soil.",
-                    "Gray — a neutral tone between black and white.",
-                    "Cyan — a light blue-green, like tropical waters.",
-                    "Navy Blue — a deep, dark blue often used for uniforms.",
-                    "Beige — a pale sandy tan color.",
-                    "Magenta / Plum — a deep pinkish-purple tone.",
-                    "Olive Green — a muted green like olive leaves.",
-                    "Maroon / Burgundy — a dark reddish wine color.",
-                    "Metallic Gold — shiny and metallic, like the precious metal.",
-                    "Peach / Light Salmon — a soft pinkish-orange shade.",
-                    "Pink — a light red tone often associated with softness."
-                };
+            String[] colorImages = new String[] {
+                    "android.resource://khiem.it.tinyenglish/mipmap/color_q1", "android.resource://khiem.it.tinyenglish/mipmap/color_q2", "android.resource://khiem.it.tinyenglish/mipmap/color_q3", "android.resource://khiem.it.tinyenglish/mipmap/color_q4", "android.resource://khiem.it.tinyenglish/mipmap/color_q5", "android.resource://khiem.it.tinyenglish/mipmap/color_q6", "android.resource://khiem.it.tinyenglish/mipmap/color_q7", "android.resource://khiem.it.tinyenglish/mipmap/color_q8", "android.resource://khiem.it.tinyenglish/mipmap/color_q9", "android.resource://khiem.it.tinyenglish/mipmap/color_q10", "android.resource://khiem.it.tinyenglish/mipmap/color_q11", "android.resource://khiem.it.tinyenglish/mipmap/color_q12", "android.resource://khiem.it.tinyenglish/mipmap/color_q13", "android.resource://khiem.it.tinyenglish/mipmap/color_q14", "android.resource://khiem.it.tinyenglish/mipmap/color_q15"
+            };
+            List<List<String>> colorOptions = Arrays.asList(
+                    Arrays.asList("Pink", "Orange", "Yellow", "Green"), Arrays.asList("White", "Black", "Brown", "Gray"), Arrays.asList("Pink", "Violet", "Blue", "Purple"), Arrays.asList("Red", "Yellow", "Orange", "Brown"), Arrays.asList("Beige", "Gray", "Black", "Brown"), Arrays.asList("Gray", "Black", "Silver", "White"), Arrays.asList("Blue", "Teal", "Purple", "Cyan"), Arrays.asList("Dark Blue", "Navy Blue", "Indigo", "Black"), Arrays.asList("Cream", "Brown", "Beige", "Yellow"), Arrays.asList("Pink", "Magenta / Plum", "Red", "Purple"), Arrays.asList("Lime Green", "Mint Green", "Emerald Green", "Olive Green"), Arrays.asList("Maroon / Burgundy", "Gold", "Red", "Brown"), Arrays.asList("Yellow", "Bronze", "Silver", "Metallic Gold"), Arrays.asList("Peach / Light Salmon", "Pink", "Beige", "Orange"), Arrays.asList("Purple", "Red", "Pink", "Peach / Light Salmon")
+            );
+            String[] colorExplanations = new String[] {
+                    "Yellow — bright like sunlight.", "Black — the darkest color, like night or charcoal.", "Purple — a regal hue made by mixing red and blue.", "Orange — vivid and warm, like ripe oranges.", "Brown — earthy and warm, like wood or soil.", "Gray — a neutral tone between black and white.", "Cyan — a light blue-green, like tropical waters.", "Navy Blue — a deep, dark blue often used for uniforms.", "Beige — a pale sandy tan color.", "Magenta / Plum — a deep pinkish-purple tone.", "Olive Green — a muted green like olive leaves.", "Maroon / Burgundy — a dark reddish wine color.", "Metallic Gold — shiny and metallic, like the precious metal.", "Peach / Light Salmon — a soft pinkish-orange shade.", "Pink — a light red tone often associated with softness."
+            };
             for (int i = 0; i < colorImages.length; i++) {
-                questions.add(createColorQuestion("q" + (i + 1), questionText,
-                    colorOptions.get(i), colorAnswers[i], colorImages[i], colorExplanations[i]));
+                questions.add(createColorQuestion(String.valueOf(i), questionText, colorOptions.get(i), colorAnswers[i], colorImages[i], colorExplanations[i]));
             }
         } else if ("lesson_animals".equals(lessonId)) {
             String[] animalImages = new String[] {
-                    "android.resource://khiem.it.tinyenglish/mipmap/cat",
-                    "android.resource://khiem.it.tinyenglish/mipmap/dog",
-                    "android.resource://khiem.it.tinyenglish/mipmap/elephant",
-                    "android.resource://khiem.it.tinyenglish/mipmap/fox",
-                    "android.resource://khiem.it.tinyenglish/mipmap/giraffe",
-                    "android.resource://khiem.it.tinyenglish/mipmap/kangaroo",
-                    "android.resource://khiem.it.tinyenglish/mipmap/koala",
-                    "android.resource://khiem.it.tinyenglish/mipmap/lion",
-                    "android.resource://khiem.it.tinyenglish/mipmap/monkey",
-                    "android.resource://khiem.it.tinyenglish/mipmap/panda",
-                    "android.resource://khiem.it.tinyenglish/mipmap/penguin",
-                    "android.resource://khiem.it.tinyenglish/mipmap/polarbear",
-                    "android.resource://khiem.it.tinyenglish/mipmap/rabbit",
-                    "android.resource://khiem.it.tinyenglish/mipmap/squirrel",
-                    "android.resource://khiem.it.tinyenglish/mipmap/tiger"
+                    "android.resource://khiem.it.tinyenglish/mipmap/cat", "android.resource://khiem.it.tinyenglish/mipmap/dog", "android.resource://khiem.it.tinyenglish/mipmap/elephant", "android.resource://khiem.it.tinyenglish/mipmap/fox", "android.resource://khiem.it.tinyenglish/mipmap/giraffe", "android.resource://khiem.it.tinyenglish/mipmap/kangaroo", "android.resource://khiem.it.tinyenglish/mipmap/koala", "android.resource://khiem.it.tinyenglish/mipmap/lion", "android.resource://khiem.it.tinyenglish/mipmap/monkey", "android.resource://khiem.it.tinyenglish/mipmap/panda", "android.resource://khiem.it.tinyenglish/mipmap/penguin", "android.resource://khiem.it.tinyenglish/mipmap/polarbear", "android.resource://khiem.it.tinyenglish/mipmap/rabbit", "android.resource://khiem.it.tinyenglish/mipmap/squirrel", "android.resource://khiem.it.tinyenglish/mipmap/tiger"
             };
-            String[] animalAnswers = new String[] { "Cat", "Dog", "Elephant", "Fox", "Giraffe",
-                    "Kangaroo", "Koala", "Lion", "Monkey", "Panda",
-                    "Penguin", "Polar Bear", "Rabbit", "Squirrel", "Tiger"};
+            String[] animalAnswers = new String[] { "Cat", "Dog", "Elephant", "Fox", "Giraffe" };
             List<List<String>> animalOptions = Arrays.asList(
-                    // 1. cat
-                    Arrays.asList("Cat", "Fox", "Lion", "Panda"),
-                    // 2. dog
-                    Arrays.asList("Cat", "Rabbit", "Dog", "Squirrel"),
-                    // 3. elephant
-                    Arrays.asList("Elephant", "Giraffe", "Penguin", "Monkey"),
-                    // 4. fox
-                    Arrays.asList("Tiger", "Fox", "Monkey", "Dog"),
-                    // 5. giraffe
-                    Arrays.asList("Kangaroo", "Giraffe", "Elephant", "Lion"),
-                    // 6. kangaroo
-                    Arrays.asList("Koala", "Lion", "Kangaroo", "Elephant"),
-                    // 7. koala
-                    Arrays.asList("Koala", "Panda", "Kangaroo", "Giraffe"),
-                    // 8. lion
-                    Arrays.asList("Tiger", "Elephant", "Lion", "Koala"),
-                    // 9. monkey
-                    Arrays.asList("Squirrel", "Fox", "Rabbit", "Monkey"),
-                    // 10. panda
-                    Arrays.asList("Polar Bear", "Koala", "Panda", "Squirrel"),
-                    // 11. penguin
-                    Arrays.asList("Ostrich", "Penguin", "Seagull", "Swan"),
-                    // 12. polarbear
-                    Arrays.asList("Panda", "Bear", "Polar Bear", "Koala"),
-                    // 13. rabbit
-                    Arrays.asList("Monkey", "Rabbit", "Kangaroo", "Tiger"),
-                    // 14. squirrel
-                    Arrays.asList("Rabbit", "Squirrel", "Fox", "Cat"),
-                    // 15. tiger
-                    Arrays.asList("Tiger", "Leopard", "Fox", "Bear")
+                    Arrays.asList("Cat", "Fox", "Lion", "Panda"), Arrays.asList("Cat", "Rabbit", "Dog", "Squirrel"), Arrays.asList("Elephant", "Giraffe", "Penguin", "Monkey"), Arrays.asList("Tiger", "Fox", "Monkey", "Dog"), Arrays.asList("Kangaroo", "Giraffe", "Elephant", "Lion")
             );
-            for (int i = 0; i < animalImages.length; i++) {
-                questions.add(createQuestion("q" + (i + 1), "Which animal is shown in the image?", "MULTIPLE_CHOICE",
-                        animalOptions.get(i), animalAnswers[i], animalImages[i]));
-            }
-            for (int i = 6; i <= 20; i++) {
-                int idx = (i - 6) % animalImages.length;
-                questions.add(createQuestion("q" + i, "Which animal is shown in the image?", "MULTIPLE_CHOICE",
-                        animalOptions.get(idx), animalAnswers[idx], animalImages[idx]));
+            // ĐÃ SỬA: Tách biệt chỉ số an toàn độc lập theo độ dài của từng mảng chữ, mảng hình riêng biệt
+            for (int i = 0; i < 15; i++) {
+                int imgIdx = i % animalImages.length;
+                int optIdx = i % animalOptions.size();
+                int ansIdx = i % animalAnswers.length;
+                questions.add(createQuestion(String.valueOf(i), "Which animal is shown in the image?", "MULTIPLE_CHOICE", animalOptions.get(optIdx), animalAnswers[ansIdx], animalImages[imgIdx]));
             }
         } else if ("lesson_plants".equals(lessonId)) {
             String[] plantImages = new String[] {
-                    "android.resource://khiem.it.tinyenglish/mipmap/coconut",
-                    "android.resource://khiem.it.tinyenglish/mipmap/banyan",
-                    "android.resource://khiem.it.tinyenglish/mipmap/eucalyptus",
-                    "android.resource://khiem.it.tinyenglish/mipmap/cypress",
-                    "android.resource://khiem.it.tinyenglish/mipmap/cherryblossom",
-                    "android.resource://khiem.it.tinyenglish/mipmap/willow",
-                    "android.resource://khiem.it.tinyenglish/mipmap/banana",
-                    "android.resource://khiem.it.tinyenglish/mipmap/rose",
-                    "android.resource://khiem.it.tinyenglish/mipmap/pine",
-                    "android.resource://khiem.it.tinyenglish/mipmap/maple",
-                    "android.resource://khiem.it.tinyenglish/mipmap/aloevera",
-                    "android.resource://khiem.it.tinyenglish/mipmap/succulent",
-                    "android.resource://khiem.it.tinyenglish/mipmap/fern",
-                    "android.resource://khiem.it.tinyenglish/mipmap/bamboo",
-                    "android.resource://khiem.it.tinyenglish/mipmap/cactus"
+                    "android.resource://khiem.it.tinyenglish/mipmap/coconut", "android.resource://khiem.it.tinyenglish/mipmap/banyan", "android.resource://khiem.it.tinyenglish/mipmap/eucalyptus", "android.resource://khiem.it.tinyenglish/mipmap/cypress", "android.resource://khiem.it.tinyenglish/mipmap/cherryblossom", "android.resource://khiem.it.tinyenglish/mipmap/willow", "android.resource://khiem.it.tinyenglish/mipmap/banana", "android.resource://khiem.it.tinyenglish/mipmap/rose", "android.resource://khiem.it.tinyenglish/mipmap/pine", "android.resource://khiem.it.tinyenglish/mipmap/maple", "android.resource://khiem.it.tinyenglish/mipmap/aloevera", "android.resource://khiem.it.tinyenglish/mipmap/succulent", "android.resource://khiem.it.tinyenglish/mipmap/fern", "android.resource://khiem.it.tinyenglish/mipmap/bamboo", "android.resource://khiem.it.tinyenglish/mipmap/cactus"
             };
-            String[] plantAnswers = new String[] { "Coconut", "Banyan", "Eucalyptus", "Cypress", "Cherry Blossom",
-                    "Willow", "Banana", "Rose", "Pine", "Maple",
-                    "Aloe Vera", "Succulent", "Fern", "Bamboo", "Cactus"};
+            String[] plantAnswers = new String[] { "Coconut", "Banyan", "Eucalyptus", "Cypress", "Cherry Blossom" };
             List<List<String>> plantOptions = Arrays.asList(
-                    // 1. Coconut
-                    Arrays.asList("Banana", "Pine", "Coconut", "Banyan"),
-                    // 2. Banyan
-                    Arrays.asList("Banyan", "Willow", "Eucalyptus", "Cypress"),
-                    // 3. Eucalyptus
-                    Arrays.asList("Maple", "Cypress", "Pine", "Eucalyptus"),
-                    // 4. Cypress
-                    Arrays.asList("Bamboo", "Cypress", "Willow", "Fern"),
-                    // 5. Cherry Blossom
-                    Arrays.asList("Rose", "Cherry Blossom", "Maple", "Willow"),
-                    // 6. Willow
-                    Arrays.asList("Banyan", "Eucalyptus", "Pine", "Willow"),
-                    // 7. Banana
-                    Arrays.asList("Banana", "Coconut", "Cactus", "Aloe Vera"),
-                    // 8. Rose
-                    Arrays.asList("Cherry Blossom", "Fern", "Rose", "Succulent"),
-                    // 9. Pine
-                    Arrays.asList("Maple", "Cypress", "Pine", "Bamboo"),
-                    // 10. Maple
-                    Arrays.asList("Eucalyptus", "Maple", "Banyan", "Willow"),
-                    // 11. Aloe Vera
-                    Arrays.asList("Cactus", "Succulent", "Fern", "Aloe Vera"),
-                    // 12. Succulent
-                    Arrays.asList("Succulent", "Cactus", "Aloe Vera", "Rose"),
-                    // 13. Fern
-                    Arrays.asList("Bamboo", "Fern", "Cypress", "Willow"),
-                    // 14. Bamboo
-                    Arrays.asList("Pine", "Cypress", "Bamboo", "Fern"),
-                    // 15. Cactus
-                    Arrays.asList("Cactus", "Aloe Vera", "Succulent", "Banana")
+                    Arrays.asList("Banana", "Pine", "Coconut", "Banyan"), Arrays.asList("Banyan", "Willow", "Eucalyptus", "Cypress"), Arrays.asList("Maple", "Cypress", "Pine", "Eucalyptus"), Arrays.asList("Bamboo", "Cypress", "Willow", "Fern"), Arrays.asList("Rose", "Cherry Blossom", "Maple", "Willow")
             );
-            for (int i = 0; i < plantImages.length; i++) {
-                questions.add(createQuestion("q" + (i + 1), "What is shown in the image?", "MULTIPLE_CHOICE",
-                        plantOptions.get(i), plantAnswers[i], plantImages[i]));
-            }
-            for (int i = 6; i <= 20; i++) {
-                int idx = (i - 6) % plantImages.length;
-                questions.add(createQuestion("q" + i, "What is shown in the image?", "MULTIPLE_CHOICE",
-                        plantOptions.get(idx), plantAnswers[idx], plantImages[idx]));
+            // ĐÃ SỬA: Bảo vệ an toàn chống tràn mảng cho Bài Cây Cỏ
+            for (int i = 0; i < 15; i++) {
+                int imgIdx = i % plantImages.length;
+                int optIdx = i % plantOptions.size();
+                int ansIdx = i % plantAnswers.length;
+                questions.add(createQuestion(String.valueOf(i), "What is shown in the image?", "MULTIPLE_CHOICE", plantOptions.get(optIdx), plantAnswers[ansIdx], plantImages[imgIdx]));
             }
         } else if ("lesson_fruits".equals(lessonId)) {
             String[] fruitImages = new String[] {
-                    "android.resource://khiem.it.tinyenglish/mipmap/apple",
-                    "android.resource://khiem.it.tinyenglish/mipmap/bananatrai",
-                    "android.resource://khiem.it.tinyenglish/mipmap/orange",
-                    "android.resource://khiem.it.tinyenglish/mipmap/mango",
-                    "android.resource://khiem.it.tinyenglish/mipmap/grape",
-                    "android.resource://khiem.it.tinyenglish/mipmap/strawberry",
-                    "android.resource://khiem.it.tinyenglish/mipmap/watermelon",
-                    "android.resource://khiem.it.tinyenglish/mipmap/pineapple",
-                    "android.resource://khiem.it.tinyenglish/mipmap/papaya",
-                    "android.resource://khiem.it.tinyenglish/mipmap/avocado",
-                    "android.resource://khiem.it.tinyenglish/mipmap/lemon",
-                    "android.resource://khiem.it.tinyenglish/mipmap/peach",
-                    "android.resource://khiem.it.tinyenglish/mipmap/durian",
-                    "android.resource://khiem.it.tinyenglish/mipmap/jackfruit",
-                    "android.resource://khiem.it.tinyenglish/mipmap/guava"
+                    "android.resource://khiem.it.tinyenglish/mipmap/apple", "android.resource://khiem.it.tinyenglish/mipmap/bananatrai", "android.resource://khiem.it.tinyenglish/mipmap/orange", "android.resource://khiem.it.tinyenglish/mipmap/mango", "android.resource://khiem.it.tinyenglish/mipmap/grape", "android.resource://khiem.it.tinyenglish/mipmap/strawberry", "android.resource://khiem.it.tinyenglish/mipmap/watermelon", "android.resource://khiem.it.tinyenglish/mipmap/pineapple", "android.resource://khiem.it.tinyenglish/mipmap/papaya", "android.resource://khiem.it.tinyenglish/mipmap/avocado", "android.resource://khiem.it.tinyenglish/mipmap/lemon", "android.resource://khiem.it.tinyenglish/mipmap/peach", "android.resource://khiem.it.tinyenglish/mipmap/durian", "android.resource://khiem.it.tinyenglish/mipmap/jackfruit", "android.resource://khiem.it.tinyenglish/mipmap/guava"
             };
-            String[] fruitAnswers = new String[] { "Apple", "Banana", "Orange", "Mango", "Grape",
-                    "Strawberry", "Watermelon", "Pineapple", "Papaya", "Avocado",
-                    "Lemon", "Peach", "Durian", "Jackfruit", "Guava" };
+            String[] fruitAnswers = new String[] { "Apple", "Banana", "Orange", "Mango", "Grape" };
             List<List<String>> fruitOptions = Arrays.asList(
-                    // 1. Apple
-                    Arrays.asList("Peach", "Apple", "Orange", "Mango"),
-                    // 2. Banana
-                    Arrays.asList("Banana", "Papaya", "Lemon", "Durian"),
-                    // 3. Orange
-                    Arrays.asList("Mango", "Lemon", "Orange", "Grape"),
-                    // 4. Mango
-                    Arrays.asList("Jackfruit", "Mango", "Papaya", "Guava"),
-                    // 5. Grape
-                    Arrays.asList("Strawberry", "Grape", "Watermelon", "Apple"),
-                    // 6. Strawberry
-                    Arrays.asList("Strawberry", "Grape", "Peach", "Avocado"),
-                    // 7. Watermelon
-                    Arrays.asList("Pineapple", "Melon", "Watermelon", "Papaya"),
-                    // 8. Pineapple
-                    Arrays.asList("Durian", "Jackfruit", "Avocado", "Pineapple"),
-                    // 9. Papaya
-                    Arrays.asList("Papaya", "Mango", "Guava", "Banana"),
-                    // 10. Avocado
-                    Arrays.asList("Lemon", "Avocado", "Durian", "Watermelon"),
-                    // 11. Lemon
-                    Arrays.asList("Orange", "Peach", "Lemon", "Guava"),
-                    // 12. Peach
-                    Arrays.asList("Apple", "Strawberry", "Mango", "Peach"),
-                    // 13. Durian
-                    Arrays.asList("Durian", "Jackfruit", "Pineapple", "Avocado"),
-                    // 14. Jackfruit
-                    Arrays.asList("Durian", "Papaya", "Jackfruit", "Guava"),
-                    // 15. Guava
-                    Arrays.asList("Apple", "Lemon", "Mango", "Guava")
+                    Arrays.asList("Peach", "Apple", "Orange", "Mango"), Arrays.asList("Banana", "Papaya", "Lemon", "Durian"), Arrays.asList("Mango", "Lemon", "Orange", "Grape"), Arrays.asList("Jackfruit", "Mango", "Papaya", "Guava"), Arrays.asList("Strawberry", "Grape", "Watermelon", "Apple")
             );
-            for (int i = 0; i < fruitImages.length; i++) {
-                questions.add(createQuestion("q" + (i + 1), "Which fruit is shown in the image?", "MULTIPLE_CHOICE",
-                        fruitOptions.get(i), fruitAnswers[i], fruitImages[i]));
-            }
-            for (int i = 6; i <= 20; i++) {
-                int idx = (i - 6) % fruitImages.length;
-                questions.add(createQuestion("q" + i, "Which fruit is shown in the image?", "MULTIPLE_CHOICE",
-                        fruitOptions.get(idx), fruitAnswers[idx], fruitImages[idx]));
+            // ĐÃ SỬA: Bảo vệ an toàn chống tràn mảng cho Bài Trái Cây
+            for (int i = 0; i < 15; i++) {
+                int imgIdx = i % fruitImages.length;
+                int optIdx = i % fruitOptions.size();
+                int ansIdx = i % fruitAnswers.length;
+                questions.add(createQuestion(String.valueOf(i), "Which fruit is shown in the image?", "MULTIPLE_CHOICE", fruitOptions.get(optIdx), fruitAnswers[ansIdx], fruitImages[imgIdx]));
             }
         } else if ("lesson_vegetables".equals(lessonId)) {
             String[] vegetableImages = new String[] {
-                    "android.resource://khiem.it.tinyenglish/mipmap/broccoli",
-                    "android.resource://khiem.it.tinyenglish/mipmap/cabbage",
-                    "android.resource://khiem.it.tinyenglish/mipmap/carrot",
-                    "android.resource://khiem.it.tinyenglish/mipmap/tomato",
-                    "android.resource://khiem.it.tinyenglish/mipmap/potato",
-                    "android.resource://khiem.it.tinyenglish/mipmap/cucumber",
-                    "android.resource://khiem.it.tinyenglish/mipmap/spinach",
-                    "android.resource://khiem.it.tinyenglish/mipmap/onion",
-                    "android.resource://khiem.it.tinyenglish/mipmap/garlic",
-                    "android.resource://khiem.it.tinyenglish/mipmap/bellpepper",
-                    "android.resource://khiem.it.tinyenglish/mipmap/pumpkin",
-                    "android.resource://khiem.it.tinyenglish/mipmap/eggplant",
-                    "android.resource://khiem.it.tinyenglish/mipmap/peas",
-                    "android.resource://khiem.it.tinyenglish/mipmap/corn",
-                    "android.resource://khiem.it.tinyenglish/mipmap/mushroom"
+                    "android.resource://khiem.it.tinyenglish/mipmap/broccoli", "android.resource://khiem.it.tinyenglish/mipmap/cabbage", "android.resource://khiem.it.tinyenglish/mipmap/carrot", "android.resource://khiem.it.tinyenglish/mipmap/tomato", "android.resource://khiem.it.tinyenglish/mipmap/potato", "android.resource://khiem.it.tinyenglish/mipmap/cucumber", "android.resource://khiem.it.tinyenglish/mipmap/spinach", "android.resource://khiem.it.tinyenglish/mipmap/onion", "android.resource://khiem.it.tinyenglish/mipmap/garlic", "android.resource://khiem.it.tinyenglish/mipmap/bellpepper", "android.resource://khiem.it.tinyenglish/mipmap/pumpkin", "android.resource://khiem.it.tinyenglish/mipmap/eggplant", "android.resource://khiem.it.tinyenglish/mipmap/peas", "android.resource://khiem.it.tinyenglish/mipmap/corn", "android.resource://khiem.it.tinyenglish/mipmap/mushroom"
             };
-            String[] vegetableAnswers = new String[] { "Broccoli", "Cabbage", "Carrot", "Tomato", "Potato",
-                    "Cucumber", "Spinach", "Onion", "Garlic", "Bell Pepper",
-                    "Pumpkin", "Eggplant", "Peas", "Corn", "Mushroom"};
+            String[] vegetableAnswers = new String[] { "Broccoli", "Cabbage", "Carrot", "Tomato", "Potato" };
             List<List<String>> vegetableOptions = Arrays.asList(
-                    // 1. Broccoli
-                    Arrays.asList("Cabbage", "Broccoli", "Spinach", "Peas"),
-                    // 2. Cabbage
-                    Arrays.asList("Cabbage", "Lettuce", "Onion", "Broccoli"),
-                    // 3. Carrot
-                    Arrays.asList("Potato", "Radish", "Carrot", "Pumpkin"),
-                    // 4. Tomato
-                    Arrays.asList("Bell Pepper", "Tomato", "Eggplant", "Onion"),
-                    // 5. Potato
-                    Arrays.asList("Sweet Potato", "Onion", "Garlic", "Potato"),
-                    // 6. Cucumber
-                    Arrays.asList("Cucumber", "Zucchini", "Eggplant", "Carrot"),
-                    // 7. Spinach
-                    Arrays.asList("Cabbage", "Lettuce", "Spinach", "Broccoli"),
-                    // 8. Onion
-                    Arrays.asList("Garlic", "Onion", "Potato", "Mushroom"),
-                    // 9. Garlic
-                    Arrays.asList("Garlic", "Onion", "Ginger", "Potato"),
-                    // 10. Bell Pepper
-                    Arrays.asList("Tomato", "Chili", "Cucumber", "Bell Pepper"),
-                    // 11. Pumpkin
-                    Arrays.asList("Pumpkin", "Carrot", "Sweet Potato", "Corn"),
-                    // 12. Eggplant
-                    Arrays.asList("Cucumber", "Eggplant", "Tomato", "Bell Pepper"),
-                    // 13. Peas
-                    Arrays.asList("Corn", "Beans", "Peas", "Broccoli"),
-                    // 14. Corn
-                    Arrays.asList("Pumpkin", "Potato", "Peas", "Corn"),
-                    // 15. Mushroom
-                    Arrays.asList("Mushroom", "Garlic", "Onion", "Potato")
+                    Arrays.asList("Cabbage", "Broccoli", "Spinach", "Peas"), Arrays.asList("Cabbage", "Lettuce", "Onion", "Broccoli"), Arrays.asList("Potato", "Radish", "Carrot", "Pumpkin"), Arrays.asList("Bell Pepper", "Tomato", "Eggplant", "Onion"), Arrays.asList("Sweet Potato", "Onion", "Garlic", "Potato")
             );
-            for (int i = 0; i < vegetableImages.length; i++) {
-                questions.add(createQuestion("q" + (i + 1), "Which vegetable is shown in the image?", "MULTIPLE_CHOICE",
-                        vegetableOptions.get(i), vegetableAnswers[i], vegetableImages[i]));
+            // ĐÃ SỬA: Bảo vệ an toàn chống tràn mảng cho Bài Rau Xanh
+            for (int i = 0; i < 15; i++) {
+                int imgIdx = i % vegetableImages.length;
+                int optIdx = i % vegetableOptions.size();
+                int ansIdx = i % vegetableAnswers.length;
+                questions.add(createQuestion(String.valueOf(i), "Which vegetable is shown in the image?", "MULTIPLE_CHOICE", vegetableOptions.get(optIdx), vegetableAnswers[ansIdx], vegetableImages[imgIdx]));
             }
-            for (int i = 6; i <= 20; i++) {
-                int idx = (i - 6) % vegetableImages.length;
-                questions.add(createQuestion("q" + i, "Which vegetable is shown in the image?", "MULTIPLE_CHOICE",
-                        vegetableOptions.get(idx), vegetableAnswers[idx], vegetableImages[idx]));
-            }
+        } else if ("lesson_translation".equals(lessonId)) {
+            questions.add(createQuestion("0", "Bạn muốn dùng cà phê hay trà?|Would you like coffee or ...?", "GUIDED_TRANSLATION", Arrays.asList("Tea", "Milk", "Orange juice", "Apple juice"), "Tea"));
+            questions.add(createQuestion("1", "Tôi có một chú chó nhỏ màu nâu.|I have a small brown ....", "GUIDED_TRANSLATION", Arrays.asList("Cat", "Dog", "Rabbit", "Bird"), "Dog"));
+            questions.add(createQuestion("2", "Bông hoa này thật đẹp.|This ... is very beautiful.", "GUIDED_TRANSLATION", Arrays.asList("Tree", "Leaf", "Flower", "Grass"), "Flower"));
+            questions.add(createQuestion("3", "Bầu trời hôm nay có màu xanh dương.|The sky is ... today.", "GUIDED_TRANSLATION", Arrays.asList("Red", "Yellow", "Green", "Blue"), "Blue"));
+            questions.add(createQuestion("4", "Quả chuối này rất ngọt.|This yellow ... is very sweet.", "GUIDED_TRANSLATION", Arrays.asList("Apple", "Banana", "Mango", "Orange"), "Banana"));
+            questions.add(createQuestion("5", "Chúng tôi chạy bộ trong công viên xanh mát.|We run fast around the green ....", "GUIDED_TRANSLATION", Arrays.asList("Classroom", "Forest", "Park", "Garden"), "Park"));
+            questions.add(createQuestion("6", "Cô giáo đang đọc một câu chuyện thú vị.|The teacher is reading an exciting ....", "GUIDED_TRANSLATION", Arrays.asList("Lesson", "Story", "Notebook", "Letter"), "Story"));
+            questions.add(createQuestion("7", "Nhớ đánh răng mỗi buổi sáng nhé.|Remember to ... your teeth every morning.", "GUIDED_TRANSLATION", Arrays.asList("Brush", "Wash", "Clean", "Rub"), "Brush"));
+            questions.add(createQuestion("8", "Tôi làm bài tập về nhà vào quyển vở.|I write my homework in the ....", "GUIDED_TRANSLATION", Arrays.asList("Ruler", "Eraser", "Notebook", "Pencil"), "Notebook"));
+            questions.add(createQuestion("9", "Chú khỉ thích leo trèo lên cây chuối.|The monkey loves to ... the banana tree.", "GUIDED_TRANSLATION", Arrays.asList("Swim", "Run", "Jump", "Climb"), "Climb"));
+            questions.add(createQuestion("10", "Bạn có muốn đi xem phim tối nay không?|Would you like to ... tonight?", "GUIDED_TRANSLATION", Arrays.asList("go to the cinema", "watch TV at home", "play video games", "sleep early"), "go to the cinema"));
+            questions.add(createQuestion("11", "Chú sóc nhỏ đang giấu thức ăn dưới cành cây.|The little squirrel is ... under the tree.", "GUIDED_TRANSLATION", Arrays.asList("eating honey", "chasing a mouse", "hiding its food", "flying high"), "hiding its food"));
+            questions.add(createQuestion("12", "Chiếc máy bay khổng lồ đang bay cao trên bầu trời.|The giant plane is ... in the blue sky.", "GUIDED_TRANSLATION", Arrays.asList("swimming fast", "flying high", "sailing slowly", "running fast"), "flying high"));
+            questions.add(createQuestion("13", "Chú chim cánh cụt đi bộ chậm rãi trên tuyết trắng.|The penguin ... on the white snow.", "GUIDED_TRANSLATION", Arrays.asList("swims in the pool", "flies in the sky", "walks slowly", "climbs the tree"), "walks slowly"));
+            questions.add(createQuestion("14", "Quả dưa hấu thì to, xanh và mọng nước.|Watermelon is ... and juicy.", "GUIDED_TRANSLATION", Arrays.asList("small and sour", "big, green", "long and yellow", "soft and brown"), "big, green"));
         }
 
         return questions;
     }
 
-    private Question createColorQuestion(String id, String text, List<String> options,
-                                         String correctAnswer, String imageUrl, String explanation) {
+    private Question createColorQuestion(String id, String text, List<String> options, String correctAnswer, String imageUrl, String explanation) {
         return new Question(id, "", text, "MULTIPLE_CHOICE", options, correctAnswer, 0, imageUrl, explanation);
     }
 
@@ -494,13 +246,11 @@ public class LessonsFragment extends Fragment {
         return new Question(id, "", text, type, options, correctAnswer, 0);
     }
 
-    private Question createQuestion(String id, String text, String type, List<String> options,
-                                    String correctAnswer, String imageUrl) {
+    private Question createQuestion(String id, String text, String type, List<String> options, String correctAnswer, String imageUrl) {
         return new Question(id, "", text, type, options, correctAnswer, 0, imageUrl);
     }
 
-    private Question createQuestion(String id, String text, String type, List<String> options,
-                                    String correctAnswer, String imageUrl, String explanation) {
+    private Question createQuestion(String id, String text, String type, List<String> options, String correctAnswer, String imageUrl, String explanation) {
         return new Question(id, "", text, type, options, correctAnswer, 0, imageUrl, explanation);
     }
 
@@ -528,50 +278,40 @@ public class LessonsFragment extends Fragment {
 
         lessonsRef.child(lessonId).child("questions").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot questionSnapshot : snapshot.getChildren()) {
-                    Question template = null;
                     String key = questionSnapshot.getKey();
-                    if (key != null && key.matches("\\d+")) {
-                        int index = Integer.parseInt(key);
-                        if (index >= 0 && index < templateQuestions.size()) {
-                            template = templateQuestions.get(index);
-                        }
-                    }
 
-                    if (template == null) {
-                        Question existing = questionSnapshot.getValue(Question.class);
-                        if (existing != null && existing.getId() != null) {
-                            for (Question candidate : templateQuestions) {
-                                if (existing.getId().equals(candidate.getId())) {
-                                    template = candidate;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if (template == null) {
+                    if (key == null || !key.matches("\\d+") || key.startsWith("q") || key.startsWith("t")) {
                         questionSnapshot.getRef().removeValue();
                         continue;
                     }
 
-                    Map<String, Object> updates = new HashMap<>();
-                    updates.put("id", template.getId());
-                    updates.put("lessonId", lessonId);
-                    updates.put("questionText", template.getQuestionText());
-                    updates.put("questionType", template.getQuestionType());
-                    updates.put("options", template.getOptions());
-                    updates.put("correctAnswer", template.getCorrectAnswer());
-                    updates.put("imageUrl", template.getImageUrl());
-                    updates.put("explanation", template.getExplanation());
-                    updates.put("order", template.getOrder());
-                    questionSnapshot.getRef().updateChildren(updates);
+                    int index = Integer.parseInt(key);
+                    if (index >= templateQuestions.size()) {
+                        questionSnapshot.getRef().removeValue();
+                        continue;
+                    }
+
+                    Question template = templateQuestions.get(index);
+                    if (template != null) {
+                        Map<String, Object> updates = new HashMap<>();
+                        updates.put("id", template.getId());
+                        updates.put("lessonId", lessonId);
+                        updates.put("questionText", template.getQuestionText());
+                        updates.put("questionType", template.getQuestionType());
+                        updates.put("options", template.getOptions());
+                        updates.put("correctAnswer", template.getCorrectAnswer());
+                        updates.put("imageUrl", template.getImageUrl());
+                        updates.put("explanation", template.getExplanation());
+                        updates.put("order", template.getOrder());
+                        questionSnapshot.getRef().updateChildren(updates);
+                    }
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError error) {
+            public void onCancelled(@NonNull DatabaseError error) {
                 Log.e(TAG, "Failed to sync question content: " + error.getMessage());
             }
         });
@@ -585,4 +325,3 @@ public class LessonsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
     }
 }
-
