@@ -4,6 +4,9 @@ public class UserProfile {
     private String uid;
     private String username;
     private String email;
+    private String gender;
+    private Long age;
+    private String birthDate;
 
     public UserProfile() {
     }
@@ -12,6 +15,15 @@ public class UserProfile {
         this.uid = uid;
         this.username = username;
         this.email = email;
+    }
+
+    public UserProfile(String uid, String username, String email, String gender, Long age, String birthDate) {
+        this.uid = uid;
+        this.username = username;
+        this.email = email;
+        this.gender = gender;
+        this.age = age;
+        this.birthDate = birthDate;
     }
 
     public String getUid() {
@@ -36,5 +48,29 @@ public class UserProfile {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Long getAge() {
+        return age;
+    }
+
+    public void setAge(Long age) {
+        this.age = age;
+    }
+
+    public String getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(String birthDate) {
+        this.birthDate = birthDate;
     }
 }

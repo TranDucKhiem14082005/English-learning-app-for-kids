@@ -178,23 +178,14 @@ public class LessonDetailActivity extends AppCompatActivity {
         String rawText = question.getQuestionText();
         String formattedContent = rawText;
 
-        // Tính toán cấp độ (Level) hiển thị dựa trên chỉ số Index câu hiện tại nhằm tăng tính thử thách
-        String levelHeader = "⭐ LEVEL 1: DỄ (Điền Từ Đơn)";
-        if (currentQuestionIndex >= 5 && currentQuestionIndex < 10) {
-            levelHeader = "⭐⭐ LEVEL 2: TRUNG BÌNH (Từ Ghép)";
-        } else if (currentQuestionIndex >= 10) {
-            levelHeader = "⭐⭐⭐ LEVEL 3: THÁCH THỨC (Điền Cụm Hành Động)";
-        }
-
         if (rawText != null && rawText.contains("|")) {
             String[] parts = rawText.split("\\|");
             String vietnamese = parts[0];
             String englishHint = parts[1];
 
-            // Thiết kế phân tầng chữ: Tiêu đề Level -> Câu tiếng Việt -> Gợi ý tiếng Anh
-            formattedContent = levelHeader + "\n\n" +
-                    "Hãy dịch câu sau:\n👉 " + vietnamese + "\n\n" +
-                    "Gợi ý: " + englishHint;
+            // Hiển thị thuần nội dung câu hỏi và gợi ý, không kèm level hoặc icon
+            formattedContent = "Câu hỏi:\n" + vietnamese + "\n\n" +
+                    "Gợi ý:\n" + englishHint;
         }
 
         questionTextView.setText(formattedContent);

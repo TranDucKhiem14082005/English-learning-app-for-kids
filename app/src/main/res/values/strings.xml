@@ -39,4 +39,18 @@
     <string name="profile_not_available">Chưa tải được thông tin tài khoản</string>
     <string name="profile_username_format">Tên tài khoản: %1$s</string>
     <string name="profile_email_format">Email: %1$s</string>
+    <string name="profile_section_info">👧 Thông tin của bé</string>
+    <string name="profile_gender_label">Giới tính</string>
+    <string name="profile_age_label">Tuổi</string>
+    <string name="profile_birth_label">Ngày sinh</string>
+    <string name="profile_save">Lưu thông tin</string>
+    <string name="profile_avatar_hint">Chạm để đổi ảnh</string>
+    <string name="profile_age_error">Tuổi phải là số dương</string>
+    <string name="profile_save_success">Đã lưu thông tin</string>
+    <string name="profile_save_failed">Không thể lưu thông tin</string>
+    <string-array name="profile_gender_options">
+        <item>Nam</item>
+        <item>Nữ</item>
+        <item>Khác</item>
+    </string-array>
 </resources>
