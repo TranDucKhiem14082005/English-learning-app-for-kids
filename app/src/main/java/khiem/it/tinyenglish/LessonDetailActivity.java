@@ -387,63 +387,74 @@ public class LessonDetailActivity extends AppCompatActivity {
     }
 
     private void unlockNextLesson() {
-        lessonsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        // 1. Bước đầu tiên: Lấy số thứ tự (order) của bài học hiện tại từ Firebase trước
+        lessonsRef.child(lessonId).child("order").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (isFinishing() || isDestroyed()) return;
+            public void onDataChange(@NonNull DataSnapshot currentLessonSnapshot) {
+                Integer currentOrder = currentLessonSnapshot.getValue(Integer.class);
+                if (currentOrder == null) currentOrder = 0;
 
-                List<LessonOrderHelper> lessonList = new ArrayList<>();
-                for (DataSnapshot lessonSnapshot : snapshot.getChildren()) {
-                    String id = lessonSnapshot.getKey();
-                    Integer order = lessonSnapshot.child("order").getValue(Integer.class);
-                    if (order == null) {
-                        order = 0;
+                final int nextOrderTarget = currentOrder + 1; // Số thứ tự của bài tiếp theo cần tìm
+
+                // 2. Bước thứ hai: Duyệt qua toàn bộ danh sách bài học để tìm bài nào có order trùng với nextOrderTarget
+                lessonsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (isFinishing() || isDestroyed()) return;
+
+                        String tempNextLessonId = null;
+
+                        for (DataSnapshot lessonSnapshot : snapshot.getChildren()) {
+                            Integer order = lessonSnapshot.child("order").getValue(Integer.class);
+                            if (order != null && order == nextOrderTarget) {
+                                tempNextLessonId = lessonSnapshot.getKey(); // Gán vào biến tạm
+                                break;
+                            }
+                        }
+
+                        // Đborder ĐÃ SỬA: Đưa biến tạm về final để vượt qua chốt kiểm duyệt Lambda của Java thành công
+                        final String nextLessonId = tempNextLessonId;
+
+                        // 3. Bước thứ ba: Tiến hành mở khóa nếu tìm thấy bài học tiếp theo phù hợp
+                        if (nextLessonId != null) {
+                            UserProgress nextLessonProgress = new UserProgress(
+                                    currentUser.getUid(),
+                                    nextLessonId,
+                                    0,
+                                    false,
+                                    System.currentTimeMillis()
+                            );
+
+                            progressRef.child(nextLessonId).setValue(nextLessonProgress)
+                                    .addOnCompleteListener(task -> {
+                                        if (task.isSuccessful()) {
+                                            Log.d(TAG, "Đã mở khóa chính xác bài học tiếp theo: " + nextLessonId);
+                                        } else {
+                                            Log.e(TAG, "Lỗi mở khóa bài học tiếp theo: " + task.getException());
+                                        }
+                                    });
+                        } else {
+                            Log.d(TAG, "Chúc mừng! Bạn đã hoàn thành bài học cuối cùng của khóa học.");
+                        }
+
+                        // Quay trở lại màn hình danh sách bài học sau khi hoàn thành
+                        nextButton.postDelayed(() -> {
+                            if (!isFinishing() && !isDestroyed()) {
+                                finish();
+                            }
+                        }, 2000);
                     }
-                    lessonList.add(new LessonOrderHelper(id, order));
-                }
 
-                lessonList.sort((l1, l2) -> Integer.compare(l1.order, l2.order));
-
-                List<String> sortedLessonIds = new ArrayList<>();
-                for (LessonOrderHelper helper : lessonList) {
-                    sortedLessonIds.add(helper.id);
-                }
-
-                int currentIndex = sortedLessonIds.indexOf(lessonId);
-
-                if (currentIndex >= 0 && currentIndex < sortedLessonIds.size() - 1) {
-                    String nextLessonId = sortedLessonIds.get(currentIndex + 1);
-
-                    UserProgress nextLessonProgress = new UserProgress(
-                            currentUser.getUid(),
-                            nextLessonId,
-                            0,
-                            false,
-                            System.currentTimeMillis()
-                    );
-
-                    progressRef.child(nextLessonId).setValue(nextLessonProgress)
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    Log.d(TAG, "Đã mở khóa chính xác bài học tiếp theo: " + nextLessonId);
-                                } else {
-                                    Log.e(TAG, "Lỗi mở khóa bài học tiếp theo: " + task.getException());
-                                }
-                            });
-                } else {
-                    Log.d(TAG, "Bạn đã hoàn thành bài học cuối cùng của khóa học!");
-                }
-
-                nextButton.postDelayed(() -> {
-                    if (!isFinishing() && !isDestroyed()) {
-                        finish();
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e(TAG, "Failed to get lessons list: " + error.getMessage());
                     }
-                }, 2000);
+                });
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Failed to get lessons list: " + error.getMessage());
+                Log.e(TAG, "Failed to get current lesson order: " + error.getMessage());
             }
         });
     }

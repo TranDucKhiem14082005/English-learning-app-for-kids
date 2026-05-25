@@ -92,7 +92,7 @@ public class LessonsFragment extends Fragment {
     private void seedLessons() {
         Map<String, Lesson> lessonMap = new HashMap<>();
         lessonMap.put("lesson_colors", new Lesson("lesson_colors", "Bài 1: Màu sắc", "Học tên các màu sắc cơ bản", "🎨", 15, true));
-        lessonMap.put("lesson_animals", new Lesson("lesson_animals", "Bài 2: Động vật", "Nhận biết tên các loài động vật", "🐾", 15, false));
+        lessonMap.put("lesson_animals", new Lesson("lesson_animals", "Bài 2: Động  vật", "Nhận biết tên các loài động vật", "🐾", 15, false));
         lessonMap.put("lesson_plants", new Lesson("lesson_plants", "Bài 3: Cây cỏ", "Tìm hiểu về các loài cây", "🌿", 15, false));
         lessonMap.put("lesson_fruits", new Lesson("lesson_fruits", "Bài 4: Trái cây", "Học tên các loại trái cây", "🍎", 15, false));
         lessonMap.put("lesson_vegetables", new Lesson("lesson_vegetables", "Bài 5: Rau xanh", "Nhận diện các loại rau xanh", "🥕", 15, false));
@@ -161,7 +161,7 @@ public class LessonsFragment extends Fragment {
             String[] animalImages = new String[] {
                     "android.resource://khiem.it.tinyenglish/mipmap/cat", "android.resource://khiem.it.tinyenglish/mipmap/dog", "android.resource://khiem.it.tinyenglish/mipmap/elephant", "android.resource://khiem.it.tinyenglish/mipmap/fox", "android.resource://khiem.it.tinyenglish/mipmap/giraffe", "android.resource://khiem.it.tinyenglish/mipmap/kangaroo", "android.resource://khiem.it.tinyenglish/mipmap/koala", "android.resource://khiem.it.tinyenglish/mipmap/lion", "android.resource://khiem.it.tinyenglish/mipmap/monkey", "android.resource://khiem.it.tinyenglish/mipmap/panda", "android.resource://khiem.it.tinyenglish/mipmap/penguin", "android.resource://khiem.it.tinyenglish/mipmap/polarbear", "android.resource://khiem.it.tinyenglish/mipmap/rabbit", "android.resource://khiem.it.tinyenglish/mipmap/squirrel", "android.resource://khiem.it.tinyenglish/mipmap/tiger"
             };
-            String[] animalAnswers = new String[] { "Cat", "Dog", "Elephant", "Fox", "Giraffe" };
+            String[] animalAnswers = new String[] { "Cat", "Dog", "Elephant", "Fox", "Giraffe", "Kangaroo", "Koala", "Lion", "Monkey", "Panda", "Penguin", "Polar Bear", "Rabbit", "Squirrel", "Tiger" };
             List<List<String>> animalOptions = Arrays.asList(
                     Arrays.asList("Cat", "Fox", "Lion", "Panda"), Arrays.asList("Cat", "Rabbit", "Dog", "Squirrel"), Arrays.asList("Elephant", "Giraffe", "Penguin", "Monkey"), Arrays.asList("Tiger", "Fox", "Monkey", "Dog"), Arrays.asList("Kangaroo", "Giraffe", "Elephant", "Lion")
             );
@@ -176,7 +176,7 @@ public class LessonsFragment extends Fragment {
             String[] plantImages = new String[] {
                     "android.resource://khiem.it.tinyenglish/mipmap/coconut", "android.resource://khiem.it.tinyenglish/mipmap/banyan", "android.resource://khiem.it.tinyenglish/mipmap/eucalyptus", "android.resource://khiem.it.tinyenglish/mipmap/cypress", "android.resource://khiem.it.tinyenglish/mipmap/cherryblossom", "android.resource://khiem.it.tinyenglish/mipmap/willow", "android.resource://khiem.it.tinyenglish/mipmap/banana", "android.resource://khiem.it.tinyenglish/mipmap/rose", "android.resource://khiem.it.tinyenglish/mipmap/pine", "android.resource://khiem.it.tinyenglish/mipmap/maple", "android.resource://khiem.it.tinyenglish/mipmap/aloevera", "android.resource://khiem.it.tinyenglish/mipmap/succulent", "android.resource://khiem.it.tinyenglish/mipmap/fern", "android.resource://khiem.it.tinyenglish/mipmap/bamboo", "android.resource://khiem.it.tinyenglish/mipmap/cactus"
             };
-            String[] plantAnswers = new String[] { "Coconut", "Banyan", "Eucalyptus", "Cypress", "Cherry Blossom" };
+            String[] plantAnswers = new String[] { "Coconut", "Banyan", "Eucalyptus", "Cypress", "Cherry Blossom", "Willow", "Banana", "Rose", "Pine", "Maple", "Aloe Vera", "Succulent", "Fern", "Bamboo", "Cactus" };
             List<List<String>> plantOptions = Arrays.asList(
                     Arrays.asList("Banana", "Pine", "Coconut", "Banyan"), Arrays.asList("Banyan", "Willow", "Eucalyptus", "Cypress"), Arrays.asList("Maple", "Cypress", "Pine", "Eucalyptus"), Arrays.asList("Bamboo", "Cypress", "Willow", "Fern"), Arrays.asList("Rose", "Cherry Blossom", "Maple", "Willow")
             );
@@ -191,7 +191,7 @@ public class LessonsFragment extends Fragment {
             String[] fruitImages = new String[] {
                     "android.resource://khiem.it.tinyenglish/mipmap/apple", "android.resource://khiem.it.tinyenglish/mipmap/bananatrai", "android.resource://khiem.it.tinyenglish/mipmap/orange", "android.resource://khiem.it.tinyenglish/mipmap/mango", "android.resource://khiem.it.tinyenglish/mipmap/grape", "android.resource://khiem.it.tinyenglish/mipmap/strawberry", "android.resource://khiem.it.tinyenglish/mipmap/watermelon", "android.resource://khiem.it.tinyenglish/mipmap/pineapple", "android.resource://khiem.it.tinyenglish/mipmap/papaya", "android.resource://khiem.it.tinyenglish/mipmap/avocado", "android.resource://khiem.it.tinyenglish/mipmap/lemon", "android.resource://khiem.it.tinyenglish/mipmap/peach", "android.resource://khiem.it.tinyenglish/mipmap/durian", "android.resource://khiem.it.tinyenglish/mipmap/jackfruit", "android.resource://khiem.it.tinyenglish/mipmap/guava"
             };
-            String[] fruitAnswers = new String[] { "Apple", "Banana", "Orange", "Mango", "Grape" };
+            String[] fruitAnswers = new String[] { "Apple", "Banana", "Orange", "Mango", "Grape", "Strawberry", "Watermelon", "Pineapple", "Papaya", "Avocado", "Lemon", "Peach", "Durian", "Jackfruit", "Guava" };
             List<List<String>> fruitOptions = Arrays.asList(
                     Arrays.asList("Peach", "Apple", "Orange", "Mango"), Arrays.asList("Banana", "Papaya", "Lemon", "Durian"), Arrays.asList("Mango", "Lemon", "Orange", "Grape"), Arrays.asList("Jackfruit", "Mango", "Papaya", "Guava"), Arrays.asList("Strawberry", "Grape", "Watermelon", "Apple")
             );
@@ -204,12 +204,54 @@ public class LessonsFragment extends Fragment {
             }
         } else if ("lesson_vegetables".equals(lessonId)) {
             String[] vegetableImages = new String[] {
-                    "android.resource://khiem.it.tinyenglish/mipmap/broccoli", "android.resource://khiem.it.tinyenglish/mipmap/cabbage", "android.resource://khiem.it.tinyenglish/mipmap/carrot", "android.resource://khiem.it.tinyenglish/mipmap/tomato", "android.resource://khiem.it.tinyenglish/mipmap/potato", "android.resource://khiem.it.tinyenglish/mipmap/cucumber", "android.resource://khiem.it.tinyenglish/mipmap/spinach", "android.resource://khiem.it.tinyenglish/mipmap/onion", "android.resource://khiem.it.tinyenglish/mipmap/garlic", "android.resource://khiem.it.tinyenglish/mipmap/bellpepper", "android.resource://khiem.it.tinyenglish/mipmap/pumpkin", "android.resource://khiem.it.tinyenglish/mipmap/eggplant", "android.resource://khiem.it.tinyenglish/mipmap/peas", "android.resource://khiem.it.tinyenglish/mipmap/corn", "android.resource://khiem.it.tinyenglish/mipmap/mushroom"
+                    "android.resource://khiem.it.tinyenglish/mipmap/broccoli",
+                    "android.resource://khiem.it.tinyenglish/mipmap/cabbage",
+                    "android.resource://khiem.it.tinyenglish/mipmap/carrot",
+                    "android.resource://khiem.it.tinyenglish/mipmap/tomato",
+                    "android.resource://khiem.it.tinyenglish/mipmap/potato",
+                    "android.resource://khiem.it.tinyenglish/mipmap/cucumber",
+                    "android.resource://khiem.it.tinyenglish/mipmap/spinach",
+                    "android.resource://khiem.it.tinyenglish/mipmap/onion",
+                    "android.resource://khiem.it.tinyenglish/mipmap/garlic",
+                    "android.resource://khiem.it.tinyenglish/mipmap/bellpepper",
+                    "android.resource://khiem.it.tinyenglish/mipmap/pumpkin",
+                    "android.resource://khiem.it.tinyenglish/mipmap/eggplant",
+                    "android.resource://khiem.it.tinyenglish/mipmap/peas",
+                    "android.resource://khiem.it.tinyenglish/mipmap/corn",
+                    "android.resource://khiem.it.tinyenglish/mipmap/mushroom"
             };
-            String[] vegetableAnswers = new String[] { "Broccoli", "Cabbage", "Carrot", "Tomato", "Potato" };
+            String[] vegetableAnswers = new String[] { "Broccoli", "Cabbage", "Carrot", "Tomato", "Potato", "Cucumber", "Spinach", "Onion", "Garlic", "Bell Pepper", "Pumpkin", "Eggplant", "Peas", "Corn", "Mushroom"};
             List<List<String>> vegetableOptions = Arrays.asList(
-                    Arrays.asList("Cabbage", "Broccoli", "Spinach", "Peas"), Arrays.asList("Cabbage", "Lettuce", "Onion", "Broccoli"), Arrays.asList("Potato", "Radish", "Carrot", "Pumpkin"), Arrays.asList("Bell Pepper", "Tomato", "Eggplant", "Onion"), Arrays.asList("Sweet Potato", "Onion", "Garlic", "Potato")
-            );
+// 1. Broccoli (Bông cải xanh)
+                    Arrays.asList("Cabbage", "Broccoli", "Spinach", "Peas"),
+                    // 2. Cabbage (Bắp cải)
+                    Arrays.asList("Cabbage", "Lettuce", "Onion", "Broccoli"),
+                    // 3. Carrot (Củ cà rốt)
+                    Arrays.asList("Potato", "Radish", "Carrot", "Pumpkin"),
+                    // 4. Tomato (Cà chua)
+                    Arrays.asList("Bell Pepper", "Tomato", "Eggplant", "Onion"),
+                    // 5. Potato (Khoai tây)
+                    Arrays.asList("Sweet Potato", "Onion", "Garlic", "Potato"),
+                    // 6. Cucumber (Dưa leo)
+                    Arrays.asList("Cucumber", "Zucchini", "Eggplant", "Carrot"),
+                    // 7. Spinach (Rau chân vịt / Cải bó xôi)
+                    Arrays.asList("Cabbage", "Lettuce", "Spinach", "Broccoli"),
+                    // 8. Onion (Hành tây)
+                    Arrays.asList("Garlic", "Onion", "Potato", "Mushroom"),
+                    // 9. Garlic (Tỏi)
+                    Arrays.asList("Garlic", "Onion", "Ginger", "Potato"),
+                    // 10. Bell Pepper (Ớt chuông)
+                    Arrays.asList("Tomato", "Chili", "Cucumber", "Bell Pepper"),
+                    // 11. Pumpkin (Bí đỏ)
+                    Arrays.asList("Pumpkin", "Carrot", "Sweet Potato", "Corn"),
+                    // 12. Eggplant (Cà tím)
+                    Arrays.asList("Cucumber", "Eggplant", "Tomato", "Bell Pepper"),
+                    // 13. Peas (Đậu Hà Lan)
+                    Arrays.asList("Corn", "Beans", "Peas", "Broccoli"),
+                    // 14. Corn (Bắp / Ngô)
+                    Arrays.asList("Pumpkin", "Potato", "Peas", "Corn"),
+                    // 15. Mushroom (Nấm)
+                    Arrays.asList("Mushroom", "Garlic", "Onion", "Potato")            );
             // ĐÃ SỬA: Bảo vệ an toàn chống tràn mảng cho Bài Rau Xanh
             for (int i = 0; i < 15; i++) {
                 int imgIdx = i % vegetableImages.length;
