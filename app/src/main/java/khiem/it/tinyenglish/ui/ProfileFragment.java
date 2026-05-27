@@ -1,11 +1,12 @@
 package khiem.it.tinyenglish.ui;
 
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +33,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -43,6 +47,7 @@ import khiem.it.tinyenglish.model.UserProfile;
 
 public class ProfileFragment extends Fragment {
 
+    private static final String BIRTH_DATE_PATTERN = "dd/MM/yyyy";
     private static final String PREFS_NAME = "profile_prefs";
     private static final String PREF_AVATAR_PREFIX = "avatar_uri_";
 
@@ -104,7 +109,35 @@ public class ProfileFragment extends Fragment {
         });
 
         avatarImage.setOnClickListener(v -> avatarPicker.launch(new String[]{"image/*"}));
-        birthInput.setOnClickListener(v -> showDatePicker());
+        birthInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String birthDate = s == null ? "" : s.toString().trim();
+                if (TextUtils.isEmpty(birthDate)) {
+                    birthInput.setError(null);
+                    return;
+                }
+                if (birthDate.length() < BIRTH_DATE_PATTERN.length()) {
+                    birthInput.setError(null);
+                    return;
+                }
+                Long computedAge = computeAgeFromBirthDate(birthDate);
+                if (computedAge == null) {
+                    birthInput.setError(getString(R.string.profile_birth_error));
+                    return;
+                }
+                birthInput.setError(null);
+                ageInput.setText(String.valueOf(computedAge));
+            }
+        });
         saveButton.setOnClickListener(v -> saveProfile());
 
         bindProfile();
@@ -140,8 +173,12 @@ public class ProfileFragment extends Fragment {
                 usernameText.setText(getString(R.string.profile_username_format, profile.getUsername()));
                 emailText.setText(getString(R.string.profile_email_format, profile.getEmail()));
                 genderInput.setText(profile.getGender() == null ? "" : profile.getGender(), false);
-                ageInput.setText(profile.getAge() == null ? "" : String.valueOf(profile.getAge()));
-                birthInput.setText(profile.getBirthDate() == null ? "" : profile.getBirthDate());
+                String birthDate = profile.getBirthDate() == null ? "" : profile.getBirthDate();
+                birthInput.setText(birthDate);
+                Long computedAge = computeAgeFromBirthDate(birthDate);
+                ageInput.setText(computedAge == null
+                        ? (profile.getAge() == null ? "" : String.valueOf(profile.getAge()))
+                        : String.valueOf(computedAge));
             }
 
             @Override
@@ -154,20 +191,6 @@ public class ProfileFragment extends Fragment {
             }
         };
         profileRef.addValueEventListener(listener);
-    }
-
-    private void showDatePicker() {
-        Calendar calendar = Calendar.getInstance();
-        DatePickerDialog dialog = new DatePickerDialog(
-                requireContext(),
-                (view, year, month, dayOfMonth) -> birthInput.setText(
-                        String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, month + 1, year)
-                ),
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-        );
-        dialog.show();
     }
 
     private void saveProfile() {
@@ -184,7 +207,15 @@ public class ProfileFragment extends Fragment {
         String birthDate = valueOf(birthInput);
         Long ageValue = null;
 
-        if (!TextUtils.isEmpty(ageText)) {
+        if (!TextUtils.isEmpty(birthDate)) {
+            Long computedAge = computeAgeFromBirthDate(birthDate);
+            if (computedAge == null) {
+                birthInput.setError(getString(R.string.profile_birth_error));
+                return;
+            }
+            ageValue = computedAge;
+            ageInput.setText(String.valueOf(computedAge));
+        } else if (!TextUtils.isEmpty(ageText)) {
             try {
                 ageValue = Long.parseLong(ageText);
                 if (ageValue <= 0) {
@@ -258,6 +289,32 @@ public class ProfileFragment extends Fragment {
 
     private String valueOf(TextView textView) {
         return textView.getText() == null ? "" : textView.getText().toString().trim();
+    }
+
+    @Nullable
+    private Long computeAgeFromBirthDate(String birthDate) {
+        if (TextUtils.isEmpty(birthDate)) {
+            return null;
+        }
+        SimpleDateFormat format = new SimpleDateFormat(BIRTH_DATE_PATTERN, Locale.getDefault());
+        format.setLenient(false);
+        Date parsedDate;
+        try {
+            parsedDate = format.parse(birthDate);
+        } catch (ParseException exception) {
+            return null;
+        }
+        Calendar birthCalendar = Calendar.getInstance();
+        birthCalendar.setTime(parsedDate);
+        Calendar today = Calendar.getInstance();
+        if (birthCalendar.after(today)) {
+            return null;
+        }
+        int age = today.get(Calendar.YEAR) - birthCalendar.get(Calendar.YEAR);
+        if (today.get(Calendar.DAY_OF_YEAR) < birthCalendar.get(Calendar.DAY_OF_YEAR)) {
+            age--;
+        }
+        return age <= 0 ? null : (long) age;
     }
 
     private android.content.SharedPreferences getPrefs() {

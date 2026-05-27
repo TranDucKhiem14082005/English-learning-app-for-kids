@@ -42,7 +42,8 @@
     <string name="profile_section_info">👧 Thông tin của bé</string>
     <string name="profile_gender_label">Giới tính</string>
     <string name="profile_age_label">Tuổi</string>
-    <string name="profile_birth_label">Ngày sinh</string>
+    <string name="profile_birth_label">Ngày sinh (dd/MM/yyyy)</string>
+    <string name="profile_birth_error">Ngày sinh không hợp lệ</string>
     <string name="profile_save">Lưu thông tin</string>
     <string name="profile_avatar_hint">Chạm để đổi ảnh</string>
     <string name="profile_age_error">Tuổi phải là số dương</string>

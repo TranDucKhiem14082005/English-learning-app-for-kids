@@ -132,13 +132,12 @@
                         android:layout_marginTop="12dp"
                         android:hint="@string/profile_birth_label">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/profileBirthInput"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:focusable="false"
-                            android:clickable="true" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/profileBirthInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="date" />
+                </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
