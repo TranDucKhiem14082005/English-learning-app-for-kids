@@ -378,74 +378,71 @@ public class LessonDetailActivity extends AppCompatActivity {
     }
 
     private void unlockNextLesson() {
-        // 1. Bước đầu tiên: Lấy số thứ tự (order) của bài học hiện tại từ Firebase trước
-        lessonsRef.child(lessonId).child("order").addListenerForSingleValueEvent(new ValueEventListener() {
+        // 1. Duyệt thẳng qua toàn bộ danh sách bài học trên Firebase để tìm bài tiếp theo dựa trên chuỗi Emoji thống nhất
+        lessonsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot currentLessonSnapshot) {
-                Integer currentOrder = currentLessonSnapshot.getValue(Integer.class);
-                if (currentOrder == null) currentOrder = 0;
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (isFinishing() || isDestroyed()) return;
 
-                final int nextOrderTarget = currentOrder + 1; // Số thứ tự của bài tiếp theo cần tìm
+                // Chuỗi định vị thứ tự bài học chuẩn chỉnh xuyên suốt hệ thống
+                String orderStr = "🎨🐾🌿🍎🥕📝";
 
-                // 2. Bước thứ hai: Duyệt qua toàn bộ danh sách bài học để tìm bài nào có order trùng với nextOrderTarget
-                lessonsRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (isFinishing() || isDestroyed()) return;
+                // Lấy thông tin Emoji của bài học hiện tại để biết mình đang đứng ở đâu
+                DataSnapshot currentLessonSnapshot = snapshot.child(lessonId);
+                String currentEmoji = currentLessonSnapshot.child("emoji").getValue(String.class);
 
-                        String tempNextLessonId = null;
+                if (currentEmoji == null) currentEmoji = "";
+                int currentIdx = orderStr.indexOf(currentEmoji);
+                int nextIdxTarget = currentIdx + 1; // Vị trí của bài tiếp theo cần tìm
 
-                        for (DataSnapshot lessonSnapshot : snapshot.getChildren()) {
-                            Integer order = lessonSnapshot.child("order").getValue(Integer.class);
-                            if (order != null && order == nextOrderTarget) {
-                                tempNextLessonId = lessonSnapshot.getKey(); // Gán vào biến tạm
-                                break;
-                            }
-                        }
+                String tempNextLessonId = null;
 
-                        // Đborder ĐÃ SỬA: Đưa biến tạm về final để vượt qua chốt kiểm duyệt Lambda của Java thành công
-                        final String nextLessonId = tempNextLessonId;
-
-                        // 3. Bước thứ ba: Tiến hành mở khóa nếu tìm thấy bài học tiếp theo phù hợp
-                        if (nextLessonId != null) {
-                            UserProgress nextLessonProgress = new UserProgress(
-                                    currentUser.getUid(),
-                                    nextLessonId,
-                                    0,
-                                    false,
-                                    System.currentTimeMillis()
-                            );
-
-                            progressRef.child(nextLessonId).setValue(nextLessonProgress)
-                                    .addOnCompleteListener(task -> {
-                                        if (task.isSuccessful()) {
-                                            Log.d(TAG, "Đã mở khóa chính xác bài học tiếp theo: " + nextLessonId);
-                                        } else {
-                                            Log.e(TAG, "Lỗi mở khóa bài học tiếp theo: " + task.getException());
-                                        }
-                                    });
-                        } else {
-                            Log.d(TAG, "Chúc mừng! Bạn đã hoàn thành bài học cuối cùng của khóa học.");
-                        }
-
-                        // Quay trở lại màn hình danh sách bài học sau khi hoàn thành
-                        nextButton.postDelayed(() -> {
-                            if (!isFinishing() && !isDestroyed()) {
-                                finish();
-                            }
-                        }, 2000);
+                // 2. Tìm xem bài học nào trên Firebase có chứa Emoji nằm ở vị trí nextIdxTarget
+                for (DataSnapshot lessonSnapshot : snapshot.getChildren()) {
+                    String emoji = lessonSnapshot.child("emoji").getValue(String.class);
+                    if (emoji != null && orderStr.indexOf(emoji) == nextIdxTarget) {
+                        tempNextLessonId = lessonSnapshot.getKey(); // Tìm thấy ID bài tiếp theo phù hợp!
+                        break;
                     }
+                }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "Failed to get lessons list: " + error.getMessage());
+                // Khóa cố định biến trung gian để mang vào khối lệnh Lambda an toàn
+                final String nextLessonId = tempNextLessonId;
+
+                // 3. Tiến hành tạo bản ghi mở khóa trên Firebase nếu tìm thấy bài học tiếp theo
+                if (nextLessonId != null) {
+                    UserProgress nextLessonProgress = new UserProgress(
+                            currentUser.getUid(),
+                            nextLessonId,
+                            0,
+                            false,
+                            System.currentTimeMillis()
+                    );
+
+                    // Đánh dấu mở khóa bằng cách set bản ghi trạng thái rỗng vào node userProgress
+                    progressRef.child(nextLessonId).setValue(nextLessonProgress)
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    Log.d(TAG, "Đã mở khóa chính xác bài học tiếp theo: " + nextLessonId);
+                                } else {
+                                    Log.e(TAG, "Lỗi mở khóa bài học tiếp theo: " + task.getException());
+                                }
+                            });
+                } else {
+                    Log.d(TAG, "Chúc mừng! Bạn đã hoàn thành bài học cuối cùng của khóa học.");
+                }
+
+                // Quay trở lại màn hình danh sách bài học sau khi hoàn thành
+                nextButton.postDelayed(() -> {
+                    if (!isFinishing() && !isDestroyed()) {
+                        finish();
                     }
-                });
+                }, 2000);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG, "Failed to get current lesson order: " + error.getMessage());
+                Log.e(TAG, "Failed to get lessons list: " + error.getMessage());
             }
         });
     }

@@ -102,12 +102,18 @@ public class LessonsFragment extends Fragment {
             String lessonId = entry.getKey();
             Lesson lesson = entry.getValue();
 
-            lessonsRef.child(lessonId).setValue(lesson).addOnCompleteListener(task -> {
+            // MẸO CHỐNG LỖI LAMBDA HOÀN HẢO:
+            // Tạo một biến sao chép cục bộ biệt lập hoàn toàn và khóa cứng nó bằng 'final'
+            final String safeLessonId = lessonId;
+
+            lessonsRef.child(safeLessonId).setValue(lesson).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    Log.d(TAG, "Lesson seeded: " + lessonId);
-                    seedQuestionsForLesson(lessonId);
+                    Log.d(TAG, "Lesson seeded: " + safeLessonId);
+
+                    // ĐÃ SỬA: Dùng biến safeLessonId đã được khóa cứng, Java sẽ không bao giờ gạch đỏ nữa!
+                    seedQuestionsForLesson(safeLessonId);
                 } else {
-                    Log.e(TAG, "Failed to seed lesson: " + lessonId);
+                    Log.e(TAG, "Failed to seed lesson: " + safeLessonId);
                 }
             });
         }

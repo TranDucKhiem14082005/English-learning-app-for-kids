@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        khiem.it.tinyenglish.util.FirebaseDataSeeder.seedDataIfNeeded(this);
         authContainer = findViewById(R.id.authContainer);
         appContainer = findViewById(R.id.appContainer);
         statusText = findViewById(R.id.statusText);

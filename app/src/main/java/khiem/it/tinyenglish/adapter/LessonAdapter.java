@@ -94,45 +94,53 @@ public class LessonAdapter extends RecyclerView.Adapter<LessonAdapter.LessonView
         holder.description.setText(lesson.getDescription());
         holder.emoji.setText(lesson.getEmoji());
 
-        // Lấy tiến độ thực tế của bài học này ra để tính toán trạng thái đóng/mở khóa
+        // Lấy tiến độ thực tế của bài học hiện tại
         UserProgress progress = progressMap.get(lesson.getId());
 
-        // CHỈNH SỬA QUAN TRỌNG: Định nghĩa một bài học ĐƯỢC MỞ KHÓA khi thỏa mãn 1 trong các điều kiện:
-        // 1. Là bài học đầu tiên (position == 0)
-        // 2. Thuộc tính unlocked mặc định trên Firebase của bài đó bằng true
-        // 3. Đã có bản ghi tiến độ tồn tại trong node userProgress (chính là bản ghi được hàm unlockNextLesson tạo ra)
-        boolean isCurrentLessonUnlocked = lesson.isUnlocked() || position == 0 || progress != null;
+        // LOGIC MỞ KHÓA ĐÃ ĐỒNG BỘ: Đổi hoàn toàn sang .isCompleted() cho khớp với Model của bạn
+        boolean isCurrentLessonUnlocked = false;
 
-        // Cập nhật giao diện Trạng thái & Điểm số tương ứng
+        if (position == 0 || lesson.isUnlocked() || progress != null) {
+            isCurrentLessonUnlocked = true;
+        } else if (position > 0) {
+            // Lấy bài học phía trước ra kiểm tra xem bé đã học đạt yêu cầu chưa
+            Lesson previousLesson = lessons.get(position - 1);
+            UserProgress previousProgress = progressMap.get(previousLesson.getId());
+
+            // ĐÃ SỬA TẠI ĐÂY: Thay isPassed() bằng isCompleted() chuẩn chỉnh
+            if (previousProgress != null && previousProgress.isCompleted()) {
+                isCurrentLessonUnlocked = true;
+            }
+        }
+
+        // Cập nhật giao diện Trạng thái & Điểm số dựa trên kết quả kiểm tra trên
         if (progress != null) {
             holder.score.setText("Score: " + progress.getScore() + "/15");
-
-            // Đổi isPassed() thành tên hàm check boolean chuẩn trong Model của bạn (isCompleted() hoặc isPassed())
             if (progress.isCompleted()) {
                 holder.status.setText("✓ Hoàn thành");
-                // SỬA TẠI ĐÂY: Ép màu chữ thành MÀU TRẮNG để nổi bật trên nền xanh lá
-                holder.status.setTextColor(ContextCompat.getColor(context, android.R.color.white));
             } else {
                 holder.status.setText("Sẵn sàng");
-                // SỬA TẠI ĐÂY: Ép màu chữ thành MÀU TRẮNG để nổi bật trên nền xanh lá
-                holder.status.setTextColor(ContextCompat.getColor(context, android.R.color.white));
             }
+            holder.status.setTextColor(ContextCompat.getColor(context, android.R.color.white));
         } else {
             holder.score.setText("Score: 0/15");
             if (isCurrentLessonUnlocked) {
                 holder.status.setText("Sẵn sàng");
-                // SỬA TẠI ĐÂY: Ép màu chữ thành MÀU TRẮNG để nổi bật trên nền xanh lá
                 holder.status.setTextColor(ContextCompat.getColor(context, android.R.color.white));
             } else {
                 holder.status.setText("Khóa");
-                // Đối với nút Khóa, nếu nền nút màu khác (ví dụ màu xám hoặc xanh nhạt) thì bạn giữ màu cũ
                 holder.status.setTextColor(ContextCompat.getColor(context, android.R.color.white));
             }
         }
 
-        // CHỈNH SỬA QUAN TRỌNG: Logic xử lý Click đồng bộ với trạng thái thực tế
+        // =========================================================================
+        // KHẮC PHỤC TRIỆT ĐỂ: Tạo một biến "bảo hiểm" và khóa cứng bằng từ khóa final
+        final boolean safeUnlockStatus = isCurrentLessonUnlocked;
+        // =========================================================================
+
+        // Thay thế biến bị lỗi bằng biến safeUnlockStatus đã được bảo vệ
         holder.card.setOnClickListener(v -> {
-            if (isCurrentLessonUnlocked) {
+            if (safeUnlockStatus) { // ĐÃ SỬA: Hết sạch gạch đỏ 100%!
                 Intent intent = new Intent(context, LessonDetailActivity.class);
                 intent.putExtra("lessonId", lesson.getId());
                 intent.putExtra("lessonTitle", lesson.getTitle());

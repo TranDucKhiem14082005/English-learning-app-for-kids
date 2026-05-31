@@ -1,11 +1,10 @@
 package khiem.it.tinyenglish.ui;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
@@ -18,6 +17,11 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,12 +40,9 @@ public class VocabularyFragment extends Fragment {
     private List<String> listTopic;
     private Map<String, List<VocabularyWord>> listWordsDetail;
 
-    // Các chuỗi hằng định nghĩa tên chủ đề cha để tránh gõ sai lệch
-    private final String T_ANIMALS = "🐾 ANIMALS|CHỦ ĐỀ: ĐỘNG VẬT|Khám phá thế giới muông thú đáng yêu!";
-    private final String T_DAILY = "🏠 DAILY LIFE|CHỦ ĐỀ: ĐỜI SỐNG|Những đồ vật quen thuộc quanh bé!";
-    private final String T_SPORTS = "⚽ SPORTS|CHỦ ĐỀ: THỂ THAO|Cùng vận động để khỏe mạnh nào!";
-    private final String T_EDUCATION = "🏫 EDUCATION|CHỦ ĐỀ: GIÁO DỤC|Hành trang bổ ích khi đến trường!";
-    private final String T_TRANSPORT = "🚀 TRANSPORT|CHỦ ĐỀ: GIAO THÔNG|Vi vu trên các nẻo đường thôi bè ơi!";
+    private DatabaseReference topicsRef;
+    private DatabaseReference wordsRef;
+
 
     @Nullable
     @Override
@@ -51,104 +52,118 @@ public class VocabularyFragment extends Fragment {
         expandableListView = view.findViewById(R.id.vocabularyExpandableListView);
         fabAddVocabulary = view.findViewById(R.id.fabAddVocabulary);
 
-        // 1. Nạp dữ liệu cứng mặc định
-        initData();
+        listTopic = new ArrayList<>();
+        listWordsDetail = new HashMap<>();
 
-        // 2. Kéo dữ liệu tự thêm của người dùng từ bộ nhớ máy lên (nếu có)
-        loadUserCustomWords();
+        topicsRef = FirebaseDatabase.getInstance().getReference("vocabulary_topics");
+        wordsRef = FirebaseDatabase.getInstance().getReference("vocabulary_words");
 
-        // 3. Khởi tạo và liên kết adapter
         adapter = new VocabularyAdapter(requireContext(), listTopic, listWordsDetail);
         expandableListView.setAdapter(adapter);
 
-        // 4. Bắt sự kiện click nút nổi để mở Form thêm từ
+        // Ép nạp thẳng dữ liệu lên mạng khi mở màn hình này
+        khiem.it.tinyenglish.util.FirebaseDataSeeder.seedDataIfNeeded(requireContext());
+
+        loadFirebaseVocabularyData();
+
         fabAddVocabulary.setOnClickListener(v -> showAddWordDialog());
 
         return view;
     }
+    private void loadFirebaseVocabularyData() {
+        // LUỒNG 1: Tải toàn bộ danh sách các chủ đề từ vựng cha về máy
+        topicsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                listTopic.clear();
+                for (DataSnapshot topicSnapshot : snapshot.getChildren()) {
 
-    private void initData() {
-        listTopic = new ArrayList<>();
-        listWordsDetail = new HashMap<>();
+                    // ĐB_SỬA ĐỔI CHÍ MANH: Trích xuất chính xác giá trị chuỗi (Value) của Node thay vì lấy cả cấu trúc
+                    String topicInfo = null;
+                    if (topicSnapshot.getValue() instanceof String) {
+                        topicInfo = topicSnapshot.getValue(String.class);
+                    } else {
+                        // Dự phòng nếu cấu trúc Firebase lưu phức tạp hơn
+                        Object value = topicSnapshot.getValue();
+                        if (value != null) topicInfo = value.toString();
+                    }
 
-        listTopic.add(T_ANIMALS);
-        List<VocabularyWord> animals = new ArrayList<>();
-        animals.add(new VocabularyWord("Elephant", "Con voi", "The elephant has a very long trunk."));
-        animals.add(new VocabularyWord("Monkey", "Con khỉ", "The funny monkey loves to eat bananas."));
-        animals.add(new VocabularyWord("Giraffe", "Hươu cao cổ", "The giraffe has a very long neck."));
-        animals.add(new VocabularyWord("Lion", "Sư tử", "The lion is the king of the jungle."));
-        animals.add(new VocabularyWord("Tiger", "Con hổ", "The tiger has beautiful black stripes."));
-        animals.add(new VocabularyWord("Dolphin", "Cá heo", "The clever dolphin jumps out of the water."));
-        animals.add(new VocabularyWord("Penguin", "Chim cánh cụt", "The penguin walks slowly on the white snow."));
-        animals.add(new VocabularyWord("Rabbit", "Con thỏ", "The cute rabbit loves eating crunchy carrots."));
-        animals.add(new VocabularyWord("Kangaroo", "Con chuột túi", "The kangaroo carries its baby in a pouch."));
-        animals.add(new VocabularyWord("Panda", "Gấu trúc", "The giant panda eats green bamboo leaves."));
-        listWordsDetail.put(T_ANIMALS, animals);
+                    if (topicInfo != null) {
+                        listTopic.add(topicInfo);
+                        if (!listWordsDetail.containsKey(topicInfo)) {
+                            listWordsDetail.put(topicInfo, new ArrayList<>());
+                        }
+                    }
+                }
+                // Sau khi nạp xong danh sách cha an toàn, gọi tiếp luồng nạp từ vựng con
+                loadFirebaseWordsDetail();
+            }
 
-        listTopic.add(T_DAILY);
-        List<VocabularyWord> dailyLife = new ArrayList<>();
-        dailyLife.add(new VocabularyWord("House", "Ngôi nhà", "We live happily in our sweet house."));
-        dailyLife.add(new VocabularyWord("Bed", "Cái giường", "I go to bed early every night."));
-        dailyLife.add(new VocabularyWord("Clock", "Cái đồng hồ", "The clock ticks and tells us the time."));
-        dailyLife.add(new VocabularyWord("Table", "Cái bàn", "There is a glass of milk on the table."));
-        dailyLife.add(new VocabularyWord("Chair", "Cái ghế", "Please sit down on this comfortable chair."));
-        dailyLife.add(new VocabularyWord("Key", "Chìa khóa", "My father uses a key to open the door."));
-        dailyLife.add(new VocabularyWord("Mirror", "Cái gương", "She looks at her smiling face in the mirror."));
-        dailyLife.add(new VocabularyWord("Brush", "Bàn chải", "Remember to brush your teeth every morning."));
-        dailyLife.add(new VocabularyWord("Spoon", "Cái muỗng / thìa", "I use a small spoon to eat my soup."));
-        dailyLife.add(new VocabularyWord("Lamp", "Cái đèn", "The desk lamp helps me read books at night."));
-        listWordsDetail.put(T_DAILY, dailyLife);
-
-        listTopic.add(T_SPORTS);
-        List<VocabularyWord> sports = new ArrayList<>();
-        sports.add(new VocabularyWord("Football", "Môn bóng đá", "The boys love playing football together."));
-        sports.add(new VocabularyWord("Swim", "Bơi lội", "I like to swim in the pool during summer."));
-        sports.add(new VocabularyWord("Run", "Chạy bộ", "We run fast around the green park."));
-        sports.add(new VocabularyWord("Bicycle", "Xe đạp", "He rides his new bicycle to school."));
-        sports.add(new VocabularyWord("Badminton", "Môn cầu lông", "She plays badminton with her sister."));
-        sports.add(new VocabularyWord("Tennis", "Môn quần vợt", "You need a racket to play tennis."));
-        sports.add(new VocabularyWord("Basketball", "Môn bóng rổ", "He throws the ball into the basketball hoop."));
-        sports.add(new VocabularyWord("Jump", "Nhảy dây", "The children jump rope on the playground."));
-        sports.add(new VocabularyWord("Skate", "Trượt patin / ván", "It is fun to skate on the smooth path."));
-        sports.add(new VocabularyWord("Winner", "Người chiến thắng", "The winner receives a shiny gold medal."));
-        listWordsDetail.put(T_SPORTS, sports);
-
-        listTopic.add(T_EDUCATION);
-        List<VocabularyWord> education = new ArrayList<>();
-        education.add(new VocabularyWord("School", "Trường học", "Our school has a big library."));
-        education.add(new VocabularyWord("Teacher", "Thầy / Cô giáo", "The teacher reads an exciting story to us."));
-        education.add(new VocabularyWord("Student", "Học sinh", "The student listens carefully in class."));
-        education.add(new VocabularyWord("Book", "Quyển sách", "I read a colorful picture book every day."));
-        education.add(new VocabularyWord("Pencil", "Bút chì", "I use a sharp pencil to draw a star."));
-        education.add(new VocabularyWord("Ruler", "Cây thước kẻ", "Use a straight ruler to draw lines."));
-        education.add(new VocabularyWord("Eraser", "Cục tẩy / gôm", "The pink eraser cleans up my mistakes."));
-        education.add(new VocabularyWord("Classroom", "Lớp học", "Our classroom is bright and clean."));
-        education.add(new VocabularyWord("Lesson", "Bài học", "Today's English lesson is very easy."));
-        education.add(new VocabularyWord("Notebook", "Quyển vở / sổ", "I write my homework in the notebook."));
-        listWordsDetail.put(T_EDUCATION, education);
-
-        listTopic.add(T_TRANSPORT);
-        List<VocabularyWord> transport = new ArrayList<>();
-        transport.add(new VocabularyWord("Car", "Xe ô tô", "My family goes for a drive in our blue car."));
-        transport.add(new VocabularyWord("Bus", "Xe buýt", "The yellow bus takes children to school."));
-        transport.add(new VocabularyWord("Train", "Tàu hỏa", "The long train runs fast on the iron track."));
-        transport.add(new VocabularyWord("Plane", "Máy bay", "The giant plane flies high in the blue sky."));
-        transport.add(new VocabularyWord("Boat", "Con thuyền", "A small wooden boat sails on the river."));
-        transport.add(new VocabularyWord("Motorbike", "Xe máy", "My mother rides a motorbike to the market."));
-        transport.add(new VocabularyWord("Helicopter", "Máy bay trực thăng", "The helicopter can land on a small rooftop."));
-        transport.add(new VocabularyWord("Truck", "Xe tải", "The big truck carries heavy boxes."));
-        transport.add(new VocabularyWord("Subway", "Tàu điện ngầm", "The subway travels fast under the city ground."));
-        transport.add(new VocabularyWord("Rocket", "Tên lửa", "The powerful rocket travels to the outer space."));
-        listWordsDetail.put(T_TRANSPORT, transport);
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                if (isAdded()) Toast.makeText(getContext(), "Lỗi kết nối Firebase!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    // Hiển thị hộp thoại Form để điền từ vựng mới
+    private void loadFirebaseWordsDetail() {
+        // LUỒNG 2: Lắng nghe danh sách từ vựng con thay đổi trực tuyến
+        wordsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Làm sạch bộ nhớ đệm RAM cũ để tránh nạp trùng lặp khi có cập nhật mới
+                for (String topic : listTopic) {
+                    List<VocabularyWord> words = listWordsDetail.get(topic);
+                    if (words != null) words.clear();
+                }
+
+                for (DataSnapshot wordGroupSnapshot : snapshot.getChildren()) {
+                    String groupKey = wordGroupSnapshot.getKey(); // Nhận diện Key sạch (Vd: "topic_animals")
+                    if (groupKey == null) continue;
+
+                    // ĐÃ SỬA ĐỔI: Thuật toán tìm kiếm thông minh dựa trên việc trích xuất chữ thô bên trong chuỗi phức tạp
+                    String matchedTopicInfo = null;
+                    for (String topic : listTopic) {
+                        String cleanTopicNameInList = topic.split("\\|")[0].replaceAll("[.#$\\[\\]]", "").trim();
+
+                        // Ánh xạ khớp nối Key an toàn của hệ thống (Vd: "topic_animals" tương ứng "🐾 ANIMALS")
+                        if (groupKey.equalsIgnoreCase(cleanTopicNameInList) ||
+                                (groupKey.equals("topic_animals") && cleanTopicNameInList.equals("🐾 ANIMALS")) ||
+                                (groupKey.equals("topic_daily") && cleanTopicNameInList.equals("🏠 DAILY LIFE")) ||
+                                (groupKey.equals("topic_sports") && cleanTopicNameInList.equals("⚽ SPORTS")) ||
+                                (groupKey.equals("topic_education") && cleanTopicNameInList.equals("🏫 EDUCATION")) ||
+                                (groupKey.equals("topic_transport") && cleanTopicNameInList.equals("🚀 TRANSPORT"))) {
+
+                            matchedTopicInfo = topic;
+                            break;
+                        }
+                    }
+
+                    // Nếu định vị được nhóm cha phù hợp, tiến hành đổ mảng từ vựng con vào trong RAM
+                    if (matchedTopicInfo != null) {
+                        List<VocabularyWord> targetList = listWordsDetail.get(matchedTopicInfo);
+                        if (targetList != null) {
+                            for (DataSnapshot singleWordSnapshot : wordGroupSnapshot.getChildren()) {
+                                VocabularyWord word = singleWordSnapshot.getValue(VocabularyWord.class);
+                                if (word != null) {
+                                    targetList.add(word);
+                                }
+                            }
+                        }
+                    }
+                }
+                // Ra lệnh đồng bộ vẽ lại toàn bộ hệ thống giao diện lên màn hình điện thoại
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
     private void showAddWordDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-
-        // Sửa requireLayoutInflater() thành getLayoutInflater() là xong liền!
         LayoutInflater inflater = getLayoutInflater();
-
         View dialogView = inflater.inflate(R.layout.dialog_add_vocabulary, null);
         builder.setView(dialogView);
 
@@ -156,18 +171,32 @@ public class VocabularyFragment extends Fragment {
         EditText edtMeaning = dialogView.findViewById(R.id.edtNewMeaning);
         EditText edtExample = dialogView.findViewById(R.id.edtNewExample);
         Spinner spinner = dialogView.findViewById(R.id.spinnerTopics);
+        EditText edtCustomTopic = dialogView.findViewById(R.id.edtCustomTopic);
 
-        // Tạo danh sách text hiển thị ngắn gọn trên Dropdown cho người dùng dễ chọn
-        List<String> displayDisplayTopics = new ArrayList<>();
-        displayDisplayTopics.add("🐾 Động vật");
-        displayDisplayTopics.add("🏠 Đời sống");
-        displayDisplayTopics.add("⚽ Thể thao");
-        displayDisplayTopics.add("🏫 Giáo dục");
-        displayDisplayTopics.add("🚀 Giao thông");
+        // Nạp danh sách Spinner hiển thị lấy trực tiếp từ dữ liệu thực tế đang chạy
+        List<String> spinnerOptions = new ArrayList<>();
+        for (String topic : listTopic) {
+            String[] parts = topic.split("\\|");
+            spinnerOptions.add(parts[0]);
+        }
+        spinnerOptions.add("➕ [Tự nhập chủ đề mới bằng tay...]");
 
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, displayDisplayTopics);
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, spinnerOptions);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(spinnerAdapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == spinnerOptions.size() - 1) {
+                    edtCustomTopic.setVisibility(View.VISIBLE);
+                } else {
+                    edtCustomTopic.setVisibility(View.GONE);
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         builder.setPositiveButton("Thêm ngay", (dialog, which) -> {
             String wordText = edtWord.getText().toString().trim();
@@ -179,75 +208,57 @@ public class VocabularyFragment extends Fragment {
                 Toast.makeText(getContext(), "Không được bỏ trống Từ hoặc Nghĩa đâu nhé!", Toast.LENGTH_SHORT).show();
                 return;
             }
+            if (exampleText.isEmpty()) exampleText = "No example available.";
 
-            if (exampleText.isEmpty()) {
-                exampleText = "No example available."; // Câu ví dụ dự phòng nếu bé lười nhập
-            }
-
-            // Ánh xạ ngược vị trí Spinner sang đúng mã Key lưu trữ của hệ thống
-            String targetTopicKey = T_ANIMALS;
-            if (selectedPosition == 1) targetTopicKey = T_DAILY;
-            else if (selectedPosition == 2) targetTopicKey = T_SPORTS;
-            else if (selectedPosition == 3) targetTopicKey = T_EDUCATION;
-            else if (selectedPosition == 4) targetTopicKey = T_TRANSPORT;
-
-            // Thêm từ mới vào mảng dữ liệu hiện tại trong bộ nhớ RAM
             VocabularyWord newWordObj = new VocabularyWord(wordText, meaningText, exampleText);
-            List<VocabularyWord> targetList = listWordsDetail.get(targetTopicKey);
-            if (targetList != null) {
-                targetList.add(newWordObj);
 
-                // Lưu từ này vĩnh viễn xuống bộ nhớ điện thoại (SharedPreferences)
-                saveWordToLocal(targetTopicKey, wordText, meaningText, exampleText);
+            // TÌNH HUỐNG 1: Người dùng tự gõ thêm chủ đề mới bằng tay
+            if (selectedPosition == spinnerOptions.size() - 1) {
+                String customTopicName = edtCustomTopic.getText().toString().trim();
+                if (customTopicName.isEmpty()) {
+                    Toast.makeText(getContext(), "Vui lòng điền tên chủ đề mới!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                // Ra lệnh Adapter cập nhật giao diện ngay lập tức
-                adapter.notifyDataSetChanged();
-                Toast.makeText(getContext(), "Đã thêm từ '" + wordText + "' thành công!", Toast.LENGTH_SHORT).show();
+                // Chuẩn hóa định dạng chuỗi tự chế có biểu tượng cuốn sổ 📝
+                String cleanNodeKey = "custom_" + System.currentTimeMillis(); // Tạo mã ID ngẫu nhiên không trùng lặp
+                String fullTopicValue = "📝 " + customTopicName + "|CHỦ ĐỀ TỰ TẠO|Danh sách từ vựng do bạn biên soạn!";
+
+                // Đẩy thông tin chủ đề lên Node topics
+                topicsRef.child(cleanNodeKey).setValue(fullTopicValue).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Tạo luôn từ vựng đầu tiên tại vị trí index số 0 bên trong chủ đề đó
+                        wordsRef.child(cleanNodeKey).child("0").setValue(newWordObj);
+                        if (isAdded()) Toast.makeText(getContext(), "Đã khởi tạo nhóm và thêm từ vựng thành công!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+            // TÌNH HUỐNG 2: Thêm từ vựng mới vào một chủ đề đã tồn tại sẵn
+            else {
+                String fullSelectedTopic = listTopic.get(selectedPosition);
+                // Trích xuất mã Key sạch an toàn để định vị chính xác Node trên Firebase
+                String cleanNodeKey = fullSelectedTopic.split("\\|")[0].replaceAll("[.#$\\[\\]]", "").trim();
+
+                // Ánh xạ ngược mảng Key hệ thống để điền vào đúng vị trí node con trên Server
+                if (cleanNodeKey.equals("🐾 ANIMALS")) cleanNodeKey = "topic_animals";
+                else if (cleanNodeKey.equals("🏠 DAILY LIFE")) cleanNodeKey = "topic_daily";
+                else if (cleanNodeKey.equals("⚽ SPORTS")) cleanNodeKey = "topic_sports";
+                else if (cleanNodeKey.equals("🏫 EDUCATION")) cleanNodeKey = "topic_education";
+                else if (cleanNodeKey.equals("🚀 TRANSPORT")) cleanNodeKey = "topic_transport";
+
+                List<VocabularyWord> currentList = listWordsDetail.get(fullSelectedTopic);
+                int nextIndex = (currentList != null) ? currentList.size() : 0;
+
+                // Đẩy từ vựng mới lên Cloud trực tuyến vĩnh viễn
+                wordsRef.child(cleanNodeKey).child(String.valueOf(nextIndex)).setValue(newWordObj).addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && isAdded()) {
+                        Toast.makeText(getContext(), "Đã nạp từ vựng mới lên đám mây thành công!", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
 
         builder.setNegativeButton("Hủy bỏ", (dialog, which) -> dialog.dismiss());
         builder.create().show();
-    }
-
-    // Hàm lưu từ xuống máy để không bị mất khi thoát app
-    private void saveWordToLocal(String topicKey, String word, String meaning, String example) {
-        SharedPreferences pref = requireContext().getSharedPreferences("CustomVocabPrefs", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-
-        // Lấy chuỗi dữ liệu đã lưu từ trước ra nối thêm từ mới vào (Chuỗi định dạng: từ_nghĩa_ví dụ###từ2_nghĩa2_ví dụ2)
-        String currentData = pref.getString(topicKey, "");
-        String newData = word + "&&" + meaning + "&&" + example;
-        if (!currentData.isEmpty()) {
-            currentData += "###" + newData;
-        } else {
-            currentData = newData;
-        }
-
-        editor.putString(topicKey, currentData);
-        editor.apply();
-    }
-
-    // Hàm bốc các từ người dùng tự thêm từ SharedPreferences nhét lại vào list khi mở app
-    private void loadUserCustomWords() {
-        SharedPreferences pref = requireContext().getSharedPreferences("CustomVocabPrefs", Context.MODE_PRIVATE);
-        String[] keys = {T_ANIMALS, T_DAILY, T_SPORTS, T_EDUCATION, T_TRANSPORT};
-
-        for (String key : keys) {
-            String rawData = pref.getString(key, "");
-            if (!rawData.isEmpty()) {
-                String[] wordsArray = rawData.split("###");
-                List<VocabularyWord> targetList = listWordsDetail.get(key);
-
-                if (targetList != null) {
-                    for (String singleWordData : wordsArray) {
-                        String[] items = singleWordData.split("&&");
-                        if (items.length >= 3) {
-                            targetList.add(new VocabularyWord(items[0], items[1], items[2]));
-                        }
-                    }
-                }
-            }
-        }
     }
 }
