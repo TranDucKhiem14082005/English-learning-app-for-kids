@@ -165,7 +165,21 @@ public class LessonsFragment extends Fragment {
             }
         } else if ("lesson_animals".equals(lessonId)) {
             String[] animalImages = new String[] {
-                    "android.resource://khiem.it.tinyenglish/mipmap/cat", "android.resource://khiem.it.tinyenglish/mipmap/dog", "android.resource://khiem.it.tinyenglish/mipmap/elephant", "android.resource://khiem.it.tinyenglish/mipmap/fox", "android.resource://khiem.it.tinyenglish/mipmap/giraffe", "android.resource://khiem.it.tinyenglish/mipmap/kangaroo", "android.resource://khiem.it.tinyenglish/mipmap/koala", "android.resource://khiem.it.tinyenglish/mipmap/lion", "android.resource://khiem.it.tinyenglish/mipmap/monkey", "android.resource://khiem.it.tinyenglish/mipmap/panda", "android.resource://khiem.it.tinyenglish/mipmap/penguin", "android.resource://khiem.it.tinyenglish/mipmap/polarbear", "android.resource://khiem.it.tinyenglish/mipmap/rabbit", "android.resource://khiem.it.tinyenglish/mipmap/squirrel", "android.resource://khiem.it.tinyenglish/mipmap/tiger"
+                    "android.resource://khiem.it.tinyenglish/mipmap/cat",
+                    "android.resource://khiem.it.tinyenglish/mipmap/dog",
+                    "android.resource://khiem.it.tinyenglish/mipmap/elephant",
+                    "android.resource://khiem.it.tinyenglish/mipmap/fox",
+                    "android.resource://khiem.it.tinyenglish/mipmap/giraffe",
+                    "android.resource://khiem.it.tinyenglish/mipmap/kangaroo",
+                    "android.resource://khiem.it.tinyenglish/mipmap/koala",
+                    "android.resource://khiem.it.tinyenglish/mipmap/lion",
+                    "android.resource://khiem.it.tinyenglish/mipmap/monkey",
+                    "android.resource://khiem.it.tinyenglish/mipmap/panda",
+                    "android.resource://khiem.it.tinyenglish/mipmap/penguin",
+                    "android.resource://khiem.it.tinyenglish/mipmap/polarbear",
+                    "android.resource://khiem.it.tinyenglish/mipmap/rabbit",
+                    "android.resource://khiem.it.tinyenglish/mipmap/squirrel",
+                    "android.resource://khiem.it.tinyenglish/mipmap/tiger"
             };
             String[] animalAnswers = new String[] { "Cat", "Dog", "Elephant", "Fox", "Giraffe", "Kangaroo", "Koala", "Lion", "Monkey", "Panda", "Penguin", "Polar Bear", "Rabbit", "Squirrel", "Tiger" };
             List<List<String>> animalOptions = Arrays.asList(
@@ -180,7 +194,21 @@ public class LessonsFragment extends Fragment {
             }
         } else if ("lesson_plants".equals(lessonId)) {
             String[] plantImages = new String[] {
-                    "android.resource://khiem.it.tinyenglish/mipmap/coconut", "android.resource://khiem.it.tinyenglish/mipmap/banyan", "android.resource://khiem.it.tinyenglish/mipmap/eucalyptus", "android.resource://khiem.it.tinyenglish/mipmap/cypress", "android.resource://khiem.it.tinyenglish/mipmap/cherryblossom", "android.resource://khiem.it.tinyenglish/mipmap/willow", "android.resource://khiem.it.tinyenglish/mipmap/banana", "android.resource://khiem.it.tinyenglish/mipmap/rose", "android.resource://khiem.it.tinyenglish/mipmap/pine", "android.resource://khiem.it.tinyenglish/mipmap/maple", "android.resource://khiem.it.tinyenglish/mipmap/aloevera", "android.resource://khiem.it.tinyenglish/mipmap/succulent", "android.resource://khiem.it.tinyenglish/mipmap/fern", "android.resource://khiem.it.tinyenglish/mipmap/bamboo", "android.resource://khiem.it.tinyenglish/mipmap/cactus"
+                    "android.resource://khiem.it.tinyenglish/mipmap/coconut",
+                    "android.resource://khiem.it.tinyenglish/mipmap/banyan",
+                    "android.resource://khiem.it.tinyenglish/mipmap/eucalyptus",
+                    "android.resource://khiem.it.tinyenglish/mipmap/cypress",
+                    "android.resource://khiem.it.tinyenglish/mipmap/cherryblossom",
+                    "android.resource://khiem.it.tinyenglish/mipmap/willow",
+                    "android.resource://khiem.it.tinyenglish/mipmap/banana",
+                    "android.resource://khiem.it.tinyenglish/mipmap/rose",
+                    "android.resource://khiem.it.tinyenglish/mipmap/pine",
+                    "android.resource://khiem.it.tinyenglish/mipmap/maple",
+                    "android.resource://khiem.it.tinyenglish/mipmap/aloevera",
+                    "android.resource://khiem.it.tinyenglish/mipmap/succulent",
+                    "android.resource://khiem.it.tinyenglish/mipmap/fern",
+                    "android.resource://khiem.it.tinyenglish/mipmap/bamboo",
+                    "android.resource://khiem.it.tinyenglish/mipmap/cactus"
             };
             String[] plantAnswers = new String[] { "Coconut", "Banyan", "Eucalyptus", "Cypress", "Cherry Blossom", "Willow", "Banana", "Rose", "Pine", "Maple", "Aloe Vera", "Succulent", "Fern", "Bamboo", "Cactus" };
             List<List<String>> plantOptions = Arrays.asList(
@@ -195,7 +223,21 @@ public class LessonsFragment extends Fragment {
             }
         } else if ("lesson_fruits".equals(lessonId)) {
             String[] fruitImages = new String[] {
-                    "android.resource://khiem.it.tinyenglish/mipmap/apple", "android.resource://khiem.it.tinyenglish/mipmap/bananatrai", "android.resource://khiem.it.tinyenglish/mipmap/orange", "android.resource://khiem.it.tinyenglish/mipmap/mango", "android.resource://khiem.it.tinyenglish/mipmap/grape", "android.resource://khiem.it.tinyenglish/mipmap/strawberry", "android.resource://khiem.it.tinyenglish/mipmap/watermelon", "android.resource://khiem.it.tinyenglish/mipmap/pineapple", "android.resource://khiem.it.tinyenglish/mipmap/papaya", "android.resource://khiem.it.tinyenglish/mipmap/avocado", "android.resource://khiem.it.tinyenglish/mipmap/lemon", "android.resource://khiem.it.tinyenglish/mipmap/peach", "android.resource://khiem.it.tinyenglish/mipmap/durian", "android.resource://khiem.it.tinyenglish/mipmap/jackfruit", "android.resource://khiem.it.tinyenglish/mipmap/guava"
+                    "android.resource://khiem.it.tinyenglish/mipmap/apple",
+                    "android.resource://khiem.it.tinyenglish/mipmap/bananatrai",
+                    "android.resource://khiem.it.tinyenglish/mipmap/orange",
+                    "android.resource://khiem.it.tinyenglish/mipmap/mango",
+                    "android.resource://khiem.it.tinyenglish/mipmap/grape",
+                    "android.resource://khiem.it.tinyenglish/mipmap/strawberry",
+                    "android.resource://khiem.it.tinyenglish/mipmap/watermelon",
+                    "android.resource://khiem.it.tinyenglish/mipmap/pineapple",
+                    "android.resource://khiem.it.tinyenglish/mipmap/papaya",
+                    "android.resource://khiem.it.tinyenglish/mipmap/avocado",
+                    "android.resource://khiem.it.tinyenglish/mipmap/lemon",
+                    "android.resource://khiem.it.tinyenglish/mipmap/peach",
+                    "android.resource://khiem.it.tinyenglish/mipmap/durian",
+                    "android.resource://khiem.it.tinyenglish/mipmap/jackfruit",     
+                    "android.resource://khiem.it.tinyenglish/mipmap/guava"
             };
             String[] fruitAnswers = new String[] { "Apple", "Banana", "Orange", "Mango", "Grape", "Strawberry", "Watermelon", "Pineapple", "Papaya", "Avocado", "Lemon", "Peach", "Durian", "Jackfruit", "Guava" };
             List<List<String>> fruitOptions = Arrays.asList(
