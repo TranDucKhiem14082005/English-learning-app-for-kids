@@ -1,3 +1,6 @@
+Link video trình bày dự án: https://drive.google.com/drive/folders/1QqeooKmv6qv2zNvvPOA7G0KsnrlU00qw?usp=drive_link
+
+
 # 📚 English Learning App For Kids
 
 Ứng dụng hỗ trợ trẻ em học tiếng Anh thông qua:
