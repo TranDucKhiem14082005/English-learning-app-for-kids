@@ -43,6 +43,8 @@ public class VocabularyFragment extends Fragment {
     private DatabaseReference topicsRef;
     private DatabaseReference wordsRef;
 
+    // Bộ nhớ đệm dùng để ánh xạ ngược mã Key ngẫu nhiên với chuỗi hiển thị thực tế trên UI
+    private Map<String, String> customTopicKeyMap;
 
     @Nullable
     @Override
@@ -54,6 +56,7 @@ public class VocabularyFragment extends Fragment {
 
         listTopic = new ArrayList<>();
         listWordsDetail = new HashMap<>();
+        customTopicKeyMap = new HashMap<>(); // Khởi tạo bộ nhớ đệm ánh xạ
 
         topicsRef = FirebaseDatabase.getInstance().getReference("vocabulary_topics");
         wordsRef = FirebaseDatabase.getInstance().getReference("vocabulary_words");
@@ -61,7 +64,6 @@ public class VocabularyFragment extends Fragment {
         adapter = new VocabularyAdapter(requireContext(), listTopic, listWordsDetail);
         expandableListView.setAdapter(adapter);
 
-        // Ép nạp thẳng dữ liệu lên mạng khi mở màn hình này
         khiem.it.tinyenglish.util.FirebaseDataSeeder.seedDataIfNeeded(requireContext());
 
         loadFirebaseVocabularyData();
@@ -70,32 +72,38 @@ public class VocabularyFragment extends Fragment {
 
         return view;
     }
+
     private void loadFirebaseVocabularyData() {
-        // LUỒNG 1: Tải toàn bộ danh sách các chủ đề từ vựng cha về máy
         topicsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 listTopic.clear();
-                for (DataSnapshot topicSnapshot : snapshot.getChildren()) {
+                customTopicKeyMap.clear(); // Làm sạch cache ánh xạ mã tự chế
 
-                    // ĐB_SỬA ĐỔI CHÍ MANH: Trích xuất chính xác giá trị chuỗi (Value) của Node thay vì lấy cả cấu trúc
+                for (DataSnapshot topicSnapshot : snapshot.getChildren()) {
+                    String topicKey = topicSnapshot.getKey(); // Bốc lấy Key của nhóm (Vd: "custom_17173...")
                     String topicInfo = null;
+
                     if (topicSnapshot.getValue() instanceof String) {
                         topicInfo = topicSnapshot.getValue(String.class);
                     } else {
-                        // Dự phòng nếu cấu trúc Firebase lưu phức tạp hơn
                         Object value = topicSnapshot.getValue();
                         if (value != null) topicInfo = value.toString();
                     }
 
-                    if (topicInfo != null) {
+                    if (topicInfo != null && topicKey != null) {
                         listTopic.add(topicInfo);
+
+                        // Lưu vết mối quan hệ: "custom_17173..." ứng với chuỗi "📝 Tên chủ đề|CHỦ ĐỀ TỰ TẠO|..."
+                        if (topicKey.startsWith("custom_")) {
+                            customTopicKeyMap.put(topicKey, topicInfo);
+                        }
+
                         if (!listWordsDetail.containsKey(topicInfo)) {
                             listWordsDetail.put(topicInfo, new ArrayList<>());
                         }
                     }
                 }
-                // Sau khi nạp xong danh sách cha an toàn, gọi tiếp luồng nạp từ vựng con
                 loadFirebaseWordsDetail();
             }
 
@@ -107,39 +115,41 @@ public class VocabularyFragment extends Fragment {
     }
 
     private void loadFirebaseWordsDetail() {
-        // LUỒNG 2: Lắng nghe danh sách từ vựng con thay đổi trực tuyến
         wordsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Làm sạch bộ nhớ đệm RAM cũ để tránh nạp trùng lặp khi có cập nhật mới
                 for (String topic : listTopic) {
                     List<VocabularyWord> words = listWordsDetail.get(topic);
                     if (words != null) words.clear();
                 }
 
                 for (DataSnapshot wordGroupSnapshot : snapshot.getChildren()) {
-                    String groupKey = wordGroupSnapshot.getKey(); // Nhận diện Key sạch (Vd: "topic_animals")
+                    String groupKey = wordGroupSnapshot.getKey();
                     if (groupKey == null) continue;
 
-                    // ĐÃ SỬA ĐỔI: Thuật toán tìm kiếm thông minh dựa trên việc trích xuất chữ thô bên trong chuỗi phức tạp
                     String matchedTopicInfo = null;
-                    for (String topic : listTopic) {
-                        String cleanTopicNameInList = topic.split("\\|")[0].replaceAll("[.#$\\[\\]]", "").trim();
 
-                        // Ánh xạ khớp nối Key an toàn của hệ thống (Vd: "topic_animals" tương ứng "🐾 ANIMALS")
-                        if (groupKey.equalsIgnoreCase(cleanTopicNameInList) ||
-                                (groupKey.equals("topic_animals") && cleanTopicNameInList.equals("🐾 ANIMALS")) ||
-                                (groupKey.equals("topic_daily") && cleanTopicNameInList.equals("🏠 DAILY LIFE")) ||
-                                (groupKey.equals("topic_sports") && cleanTopicNameInList.equals("⚽ SPORTS")) ||
-                                (groupKey.equals("topic_education") && cleanTopicNameInList.equals("🏫 EDUCATION")) ||
-                                (groupKey.equals("topic_transport") && cleanTopicNameInList.equals("🚀 TRANSPORT"))) {
+                    // KHẮC PHỤC LỖI: Kiểm tra xem nếu Key thuộc nhóm tự tạo thì lấy từ Map ánh xạ ra ngay lập tức
+                    if (groupKey.startsWith("custom_") && customTopicKeyMap.containsKey(groupKey)) {
+                        matchedTopicInfo = customTopicKeyMap.get(groupKey);
+                    } else {
+                        // Nếu là nhóm hệ thống sẵn có thì áp dụng thuật toán so khớp chuỗi cũ của anh
+                        for (String topic : listTopic) {
+                            String cleanTopicNameInList = topic.split("\\|")[0].replaceAll("[.#$\\[\\]]", "").trim();
 
-                            matchedTopicInfo = topic;
-                            break;
+                            if (groupKey.equalsIgnoreCase(cleanTopicNameInList) ||
+                                    (groupKey.equals("topic_animals") && cleanTopicNameInList.equals("🐾 ANIMALS")) ||
+                                    (groupKey.equals("topic_daily") && cleanTopicNameInList.equals("🏠 DAILY LIFE")) ||
+                                    (groupKey.equals("topic_sports") && cleanTopicNameInList.equals("⚽ SPORTS")) ||
+                                    (groupKey.equals("topic_education") && cleanTopicNameInList.equals("🏫 EDUCATION")) ||
+                                    (groupKey.equals("topic_transport") && cleanTopicNameInList.equals("🚀 TRANSPORT"))) {
+
+                                matchedTopicInfo = topic;
+                                break;
+                            }
                         }
                     }
 
-                    // Nếu định vị được nhóm cha phù hợp, tiến hành đổ mảng từ vựng con vào trong RAM
                     if (matchedTopicInfo != null) {
                         List<VocabularyWord> targetList = listWordsDetail.get(matchedTopicInfo);
                         if (targetList != null) {
@@ -152,7 +162,6 @@ public class VocabularyFragment extends Fragment {
                         }
                     }
                 }
-                // Ra lệnh đồng bộ vẽ lại toàn bộ hệ thống giao diện lên màn hình điện thoại
                 adapter.notifyDataSetChanged();
             }
 
@@ -173,7 +182,6 @@ public class VocabularyFragment extends Fragment {
         Spinner spinner = dialogView.findViewById(R.id.spinnerTopics);
         EditText edtCustomTopic = dialogView.findViewById(R.id.edtCustomTopic);
 
-        // Nạp danh sách Spinner hiển thị lấy trực tiếp từ dữ liệu thực tế đang chạy
         List<String> spinnerOptions = new ArrayList<>();
         for (String topic : listTopic) {
             String[] parts = topic.split("\\|");
@@ -212,7 +220,6 @@ public class VocabularyFragment extends Fragment {
 
             VocabularyWord newWordObj = new VocabularyWord(wordText, meaningText, exampleText);
 
-            // TÌNH HUỐNG 1: Người dùng tự gõ thêm chủ đề mới bằng tay
             if (selectedPosition == spinnerOptions.size() - 1) {
                 String customTopicName = edtCustomTopic.getText().toString().trim();
                 if (customTopicName.isEmpty()) {
@@ -220,26 +227,21 @@ public class VocabularyFragment extends Fragment {
                     return;
                 }
 
-                // Chuẩn hóa định dạng chuỗi tự chế có biểu tượng cuốn sổ 📝
-                String cleanNodeKey = "custom_" + System.currentTimeMillis(); // Tạo mã ID ngẫu nhiên không trùng lặp
+                String cleanNodeKey = "custom_" + System.currentTimeMillis();
                 String fullTopicValue = "📝 " + customTopicName + "|CHỦ ĐỀ TỰ TẠO|Danh sách từ vựng do bạn biên soạn!";
 
-                // Đẩy thông tin chủ đề lên Node topics
+                // Tiến hành đồng bộ hóa dữ liệu gối đầu trực tiếp lên đám mây
                 topicsRef.child(cleanNodeKey).setValue(fullTopicValue).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        // Tạo luôn từ vựng đầu tiên tại vị trí index số 0 bên trong chủ đề đó
                         wordsRef.child(cleanNodeKey).child("0").setValue(newWordObj);
                         if (isAdded()) Toast.makeText(getContext(), "Đã khởi tạo nhóm và thêm từ vựng thành công!", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
-            // TÌNH HUỐNG 2: Thêm từ vựng mới vào một chủ đề đã tồn tại sẵn
             else {
                 String fullSelectedTopic = listTopic.get(selectedPosition);
-                // Trích xuất mã Key sạch an toàn để định vị chính xác Node trên Firebase
                 String cleanNodeKey = fullSelectedTopic.split("\\|")[0].replaceAll("[.#$\\[\\]]", "").trim();
 
-                // Ánh xạ ngược mảng Key hệ thống để điền vào đúng vị trí node con trên Server
                 if (cleanNodeKey.equals("🐾 ANIMALS")) cleanNodeKey = "topic_animals";
                 else if (cleanNodeKey.equals("🏠 DAILY LIFE")) cleanNodeKey = "topic_daily";
                 else if (cleanNodeKey.equals("⚽ SPORTS")) cleanNodeKey = "topic_sports";
@@ -249,7 +251,6 @@ public class VocabularyFragment extends Fragment {
                 List<VocabularyWord> currentList = listWordsDetail.get(fullSelectedTopic);
                 int nextIndex = (currentList != null) ? currentList.size() : 0;
 
-                // Đẩy từ vựng mới lên Cloud trực tuyến vĩnh viễn
                 wordsRef.child(cleanNodeKey).child(String.valueOf(nextIndex)).setValue(newWordObj).addOnCompleteListener(task -> {
                     if (task.isSuccessful() && isAdded()) {
                         Toast.makeText(getContext(), "Đã nạp từ vựng mới lên đám mây thành công!", Toast.LENGTH_SHORT).show();

@@ -182,8 +182,51 @@ public class LessonsFragment extends Fragment {
             };
             String[] animalAnswers = new String[] { "Cat", "Dog", "Elephant", "Fox", "Giraffe", "Kangaroo", "Koala", "Lion", "Monkey", "Panda", "Penguin", "Polar Bear", "Rabbit", "Squirrel", "Tiger" };
             List<List<String>> animalOptions = Arrays.asList(
-                    Arrays.asList("Cat", "Fox", "Lion", "Panda"), Arrays.asList("Cat", "Rabbit", "Dog", "Squirrel"), Arrays.asList("Elephant", "Giraffe", "Penguin", "Monkey"), Arrays.asList("Tiger", "Fox", "Monkey", "Dog"), Arrays.asList("Kangaroo", "Giraffe", "Elephant", "Lion")
-            );
+                    // 1. Cat
+                    Arrays.asList("Fox", "Cat", "Lion", "Panda"),
+
+                    // 2. Dog
+                    Arrays.asList("Dog", "Rabbit", "Cat", "Squirrel"),
+
+                    // 3. Elephant
+                    Arrays.asList("Giraffe", "Penguin", "Elephant", "Monkey"),
+
+                    // 4. Fox
+                    Arrays.asList("Tiger", "Monkey", "Dog", "Fox"),
+
+                    // 5. Giraffe
+                    Arrays.asList("Giraffe", "Kangaroo", "Elephant", "Lion"),
+
+                    // 6. Kangaroo
+                    Arrays.asList("Koala", "Lion", "Kangaroo", "Elephant"),
+
+                    // 7. Koala
+                    Arrays.asList("Koala", "Panda", "Giraffe", "Monkey"),
+
+                    // 8. Lion
+                    Arrays.asList("Tiger", "Lion", "Elephant", "Koala"),
+
+                    // 9. Monkey
+                    Arrays.asList("Squirrel", "Fox", "Rabbit", "Monkey"),
+
+                    // 10. Panda
+                    Arrays.asList("Panda", "Polar Bear", "Koala", "Squirrel"),
+
+                    // 11. Penguin
+                    Arrays.asList("Ostrich", "Penguin", "Seagull", "Swan"),
+
+                    // 12. Polar Bear
+                    Arrays.asList("Panda", "Bear", "Polar Bear", "Koala"),
+
+                    // 13. Rabbit
+                    Arrays.asList("Monkey", "Rabbit", "Kangaroo", "Tiger"),
+
+                    // 14. Squirrel
+                    Arrays.asList("Rabbit", "Squirrel", "Fox", "Cat"),
+
+                    // 15. Tiger
+                    Arrays.asList("Tiger", "Leopard", "Fox", "Bear")
+                    );
             // ĐÃ SỬA: Tách biệt chỉ số an toàn độc lập theo độ dài của từng mảng chữ, mảng hình riêng biệt
             for (int i = 0; i < 15; i++) {
                 int imgIdx = i % animalImages.length;
@@ -211,8 +254,51 @@ public class LessonsFragment extends Fragment {
             };
             String[] plantAnswers = new String[] { "Coconut", "Banyan", "Eucalyptus", "Cypress", "Cherry Blossom", "Willow", "Banana", "Rose", "Pine", "Maple", "Aloe Vera", "Succulent", "Fern", "Bamboo", "Cactus" };
             List<List<String>> plantOptions = Arrays.asList(
-                    Arrays.asList("Banana", "Pine", "Coconut", "Banyan"), Arrays.asList("Banyan", "Willow", "Eucalyptus", "Cypress"), Arrays.asList("Maple", "Cypress", "Pine", "Eucalyptus"), Arrays.asList("Bamboo", "Cypress", "Willow", "Fern"), Arrays.asList("Rose", "Cherry Blossom", "Maple", "Willow")
-            );
+                    // 1. Coconut
+                    Arrays.asList("Banana", "Coconut", "Pine", "Banyan"),
+
+                    // 2. Banyan
+                    Arrays.asList("Willow", "Eucalyptus", "Cypress", "Banyan"),
+
+                    // 3. Eucalyptus
+                    Arrays.asList("Eucalyptus", "Maple", "Cypress", "Pine"),
+
+                    // 4. Cypress
+                    Arrays.asList("Bamboo", "Willow", "Cypress", "Fern"),
+
+                    // 5. Cherry Blossom
+                    Arrays.asList("Rose", "Maple", "Willow", "Cherry Blossom"),
+
+                    // 6. Willow
+                    Arrays.asList("Willow", "Banyan", "Eucalyptus", "Pine"),
+
+                    // 7. Banana
+                    Arrays.asList("Coconut", "Banana", "Cactus", "Aloe Vera"),
+
+                    // 8. Rose
+                    Arrays.asList("Cherry Blossom", "Rose", "Fern", "Succulent"),
+
+                    // 9. Pine
+                    Arrays.asList("Maple", "Cypress", "Bamboo", "Pine"),
+
+                    // 10. Maple
+                    Arrays.asList("Eucalyptus", "Maple", "Banyan", "Willow"),
+
+                    // 11. Aloe Vera
+                    Arrays.asList("Cactus", "Succulent", "Aloe Vera", "Fern"),
+
+                    // 12. Succulent
+                    Arrays.asList("Succulent", "Cactus", "Aloe Vera", "Rose"),
+
+                    // 13. Fern
+                    Arrays.asList("Bamboo", "Cypress", "Willow", "Fern"),
+
+                    // 14. Bamboo
+                    Arrays.asList("Bamboo", "Pine", "Cypress", "Fern"),
+
+                    // 15. Cactus
+                    Arrays.asList("Aloe Vera", "Succulent", "Cactus", "Banana")
+                    );
             // ĐÃ SỬA: Bảo vệ an toàn chống tràn mảng cho Bài Cây Cỏ
             for (int i = 0; i < 15; i++) {
                 int imgIdx = i % plantImages.length;
@@ -240,8 +326,51 @@ public class LessonsFragment extends Fragment {
             };
             String[] fruitAnswers = new String[] { "Apple", "Banana", "Orange", "Mango", "Grape", "Strawberry", "Watermelon", "Pineapple", "Papaya", "Avocado", "Lemon", "Peach", "Durian", "Jackfruit", "Guava" };
             List<List<String>> fruitOptions = Arrays.asList(
-                    Arrays.asList("Peach", "Apple", "Orange", "Mango"), Arrays.asList("Banana", "Papaya", "Lemon", "Durian"), Arrays.asList("Mango", "Lemon", "Orange", "Grape"), Arrays.asList("Jackfruit", "Mango", "Papaya", "Guava"), Arrays.asList("Strawberry", "Grape", "Watermelon", "Apple")
-            );
+                    // 1. Apple
+                    Arrays.asList("Peach", "Orange", "Apple", "Mango"),
+
+                    // 2. Banana
+                    Arrays.asList("Papaya", "Banana", "Lemon", "Durian"),
+
+                    // 3. Orange
+                    Arrays.asList("Orange", "Mango", "Lemon", "Grape"),
+
+                    // 4. Mango
+                    Arrays.asList("Jackfruit", "Papaya", "Guava", "Mango"),
+
+                    // 5. Grape
+                    Arrays.asList("Strawberry", "Watermelon", "Grape", "Apple"),
+
+                    // 6. Strawberry
+                    Arrays.asList("Strawberry", "Grape", "Peach", "Avocado"),
+
+                    // 7. Watermelon
+                    Arrays.asList("Pineapple", "Watermelon", "Melon", "Papaya"),
+
+                    // 8. Pineapple
+                    Arrays.asList("Durian", "Jackfruit", "Pineapple", "Avocado"),
+
+                    // 9. Papaya
+                    Arrays.asList("Papaya", "Mango", "Guava", "Banana"),
+
+                    // 10. Avocado
+                    Arrays.asList("Lemon", "Durian", "Avocado", "Watermelon"),
+
+                    // 11. Lemon
+                    Arrays.asList("Orange", "Lemon", "Peach", "Guava"),
+
+                    // 12. Peach
+                    Arrays.asList("Apple", "Peach", "Strawberry", "Mango"),
+
+                    // 13. Durian
+                    Arrays.asList("Jackfruit", "Pineapple", "Avocado", "Durian"),
+
+                    // 14. Jackfruit
+                    Arrays.asList("Jackfruit", "Durian", "Papaya", "Guava"),
+
+                    // 15. Guava
+                    Arrays.asList("Apple", "Lemon", "Guava", "Mango")
+                    );
             // ĐÃ SỬA: Bảo vệ an toàn chống tràn mảng cho Bài Trái Cây
             for (int i = 0; i < 15; i++) {
                 int imgIdx = i % fruitImages.length;
@@ -269,7 +398,7 @@ public class LessonsFragment extends Fragment {
             };
             String[] vegetableAnswers = new String[] { "Broccoli", "Cabbage", "Carrot", "Tomato", "Potato", "Cucumber", "Spinach", "Onion", "Garlic", "Bell Pepper", "Pumpkin", "Eggplant", "Peas", "Corn", "Mushroom"};
             List<List<String>> vegetableOptions = Arrays.asList(
-// 1. Broccoli (Bông cải xanh)
+                    // 1. Broccoli (Bông cải xanh)
                     Arrays.asList("Cabbage", "Broccoli", "Spinach", "Peas"),
                     // 2. Cabbage (Bắp cải)
                     Arrays.asList("Cabbage", "Lettuce", "Onion", "Broccoli"),
